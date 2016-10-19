@@ -1,0 +1,12 @@
+version: '2'
+services:
+  tests:
+    build: .
+    privileged: true
+    environment:
+      - RETHINKDB_HOST=db
+    links:
+      - rethinkdb:db
+    command: /bin/bash -c "tail -f /dev/null"
+  rethinkdb:
+    image: 'library/rethinkdb'
