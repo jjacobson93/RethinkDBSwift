@@ -46,7 +46,7 @@ class TransformationTests: BaseTests {
     func testOrderBy() throws {
         let conn = try r.connect(host: Tests.host)
         
-        let documents: [Document] = try r.db("galaxy").table("systems").orderBy(sortKey: "name").run(conn)
+        let documents: [Document] = try r.db("galaxy").table("systems").orderBy("name").run(conn)
         var prev: Document?
         for system in documents {
             if let prev = prev {
@@ -59,6 +59,37 @@ class TransformationTests: BaseTests {
             }
             
             prev = system
+        }
+        
+        let people: [Document] = [
+            ["name": "John Smith", "age": 24],
+            ["name": "John Smith", "age": 27],
+            ["name": "John Smith", "age": 45],
+            ["name": "Jack Smith", "age": 15],
+            ["name": "Bob Smith", "age": 39]
+        ]
+        
+        let documents2: [Document] = try r.expr(people).orderBy("name", r.desc("age")).run(conn)
+        prev = nil
+        for person in documents2 {
+            if let prev = prev {
+                guard let personName = person["name"].stringValue else {
+                    XCTFail("Expected person[\"name\"] to be a string, found \(person["name"])")
+                    return
+                }
+                
+                guard let personAge = person["age"].intValue else {
+                    XCTFail("Expected person[\"age\"] to be an integer, found \(person["age"])")
+                    return
+                }
+                
+                XCTAssertLessThanOrEqual(prev["name"].string, personName, "Expected \"\(prev["name"].string)\" <= \"\(personName)\"")
+                if prev["name"].string == personName {
+                    XCTAssertGreaterThanOrEqual(prev["age"].int, personAge, "Expected \"\(prev["age"].int)\" >= \"\(personAge)\"")
+                }
+            }
+            
+            prev = person
         }
     }
     

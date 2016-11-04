@@ -9,7 +9,7 @@ public class RethinkDB {
         return conn
     }
 
-    public func uuid() -> ReqlQuery {
+    public func uuid() -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.uuid.rawValue])
     }
 
@@ -17,23 +17,23 @@ public class RethinkDB {
         return ReqlQueryDatabase(name: name)
     }
 
-    public func dbCreate(_ name: String) -> ReqlQuery {
+    public func dbCreate(_ name: String) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.dbCreate.rawValue, [name]])
     }
 
-    public func dbDrop(_ name: String) -> ReqlQuery {
+    public func dbDrop(_ name: String) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.dbDrop.rawValue, [name]])
     }
 
-    public func dbList() -> ReqlQuerySequence {
+    public func dbList() -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.dbList.rawValue])
     }
     
-    public func table(_ name: String, options: TableArg...) -> ReqlQueryTable {
+    public func table(_ name: String, options: TableArg...) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.table.rawValue, [name], OptArgs(options).json])
     }
 
-    public func point(_ longitude: Double, latitude: Double) -> ReqlQueryPoint {
+    public func point(_ longitude: Double, latitude: Double) -> ReqlExpr {
         return ReqlExpr(longitude: longitude, latitude:latitude)
     }
 
@@ -150,7 +150,7 @@ public class RethinkDB {
         return ReqlExpr(json: [ReqlTerm.object.rawValue, pairs])
     }
 
-    public func range(_ start: ReqlExpr, _ end: ReqlExpr) -> ReqlQuerySequence {
+    public func range(_ start: ReqlExpr, _ end: ReqlExpr) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.range.rawValue, [start.json, end.json]])
     }
 
@@ -209,7 +209,7 @@ public class RethinkDB {
 
     Only longitude/latitude coordinates are supported. GeoJSON objects that use Cartesian coordinates, specify an altitude, 
     or specify their own coordinate reference system will be rejected. */
-    public func geoJSON(_ json: ReqlSerializable) -> ReqlQueryGeometry {
+    public func geoJSON(_ json: ReqlSerializable) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.geoJSON.rawValue, [json.json]])
     }
 
@@ -222,11 +222,11 @@ public class RethinkDB {
         return ReqlExpr(json: [ReqlTerm.line.rawValue, [from.json, to.json]])
     }
 
-    public func asc(key: String) -> ReqlExpr {
+    public func asc(_ key: String) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.asc.rawValue, [key]])
     }
 
-    public func desc(key: String) -> ReqlExpr {
+    public func desc(_ key: String) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.desc.rawValue, [key]])
     }
 }

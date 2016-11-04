@@ -120,12 +120,6 @@ extension ReqlQueryTable {
         return ReqlExpr(json: [ReqlTerm.getAll.rawValue, [self.json] + keys.map({$0.json}), ["index": index]])
     }
     
-    public func orderBy(index: ReqlSerializable) -> ReqlExpr {
-        var querySequence: [Any] = [ReqlTerm.orderBy.rawValue, [self.json]]
-        querySequence.append(["index": index.json])
-        return ReqlExpr(json: querySequence)
-    }
-    
     public func between(_ lower: ReqlSerializable, _ upper: ReqlSerializable) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.between.rawValue, [self.json, lower.json, upper.json]])
     }

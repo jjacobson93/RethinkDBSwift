@@ -130,8 +130,29 @@ extension ReqlQuerySequence {
         return ReqlExpr(json: [ReqlTerm.without.rawValue, [self.json, [ReqlTerm.makeArray.rawValue, values]]])
     }
     
-    public func orderBy(sortKey: ReqlSerializable) -> ReqlExpr {
+    public func orderBy(_ sortKey: ReqlSerializable) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.orderBy.rawValue, [self.json, sortKey.json]])
+    }
+    
+    public func orderBy(_ sortKeys: ReqlSerializable..., index: String = "") -> ReqlExpr {
+        var json: [Any] = [ReqlTerm.orderBy.rawValue]
+        var params = [self.json]
+        params.append(contentsOf: sortKeys.map { $0.json })
+        json.append(params)
+        if index != "" {
+            json.append(["index": index.json])
+        }
+        return ReqlExpr(json: json)
+    }
+    
+    public func orderBy(_ predicates: ReqlPredicate..., index: String = "") -> ReqlExpr {
+        let lambdas = predicates.map({ ReqlQueryLambda($0) })
+        var params = [self.json]
+        params.append(contentsOf: lambdas.map { $0.json })
+        if index != "" {
+            params.append(["index": index.json])
+        }
+        return ReqlExpr(json: [ReqlTerm.orderBy.rawValue, params])
     }
     
     public func has(field: ReqlSerializable) -> ReqlExpr {
