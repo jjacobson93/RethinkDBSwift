@@ -11,14 +11,14 @@ enum ReqlQueryType: Int {
 
 class Query {
     var token: UInt64
-    var term: Any
+    var term: [Any]
     var data: Data
     var globalOptions: OptArgs<GlobalArg>
     var isNoReply: Bool {
         return self.globalOptions.get(key: "noreply") ?? false
     }
 
-    init(type: ReqlQueryType, token: UInt64, term: Any, globalOptions: OptArgs<GlobalArg>) throws {
+    init(type: ReqlQueryType, token: UInt64, term: [Any], globalOptions: OptArgs<GlobalArg>) throws {
         self.globalOptions = globalOptions
         let json = [type.rawValue, term, globalOptions.json]
         self.data = try JSON.data(with: json) //JSONSerialization.data(withJSONObject: json, options: [])
@@ -26,7 +26,7 @@ class Query {
         self.token = token
     }
 
-    static func start(_ token: UInt64, term: Any, globalOptions: OptArgs<GlobalArg>) throws -> Query {
+    static func start(_ token: UInt64, term: [Any], globalOptions: OptArgs<GlobalArg>) throws -> Query {
         return try Query(type: .start, token: token, term: term, globalOptions: globalOptions)
     }
 

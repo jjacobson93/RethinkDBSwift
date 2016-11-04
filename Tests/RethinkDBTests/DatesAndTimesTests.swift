@@ -15,7 +15,7 @@ class DatesAndTimesTests: BaseTests {
     
     override func setUp() {
         super.setUp()
-        self.conn = try! r.connect(host: BaseTests.host)
+        self.conn = try! r.connect(host: Tests.host)
     }
     
     func testNow() throws {
@@ -56,13 +56,13 @@ class DatesAndTimesTests: BaseTests {
     }
     
     func testTimezone() throws {
-        let _: Cursor<Document> = try r.db("test").table("contacts").filter({ (user) -> (ReqlQuery) in
+        let _: Cursor<Document> = try r.db("test").table("contacts").filter({ user in
             return user["birthdate"].timezone() == "-07:00"
         }).run(conn)
     }
     
     func testYear() throws {
-        let year: Int64 = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").year().run(conn)
+        let year: Int = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").year().run(conn)
         
         XCTAssert(year == 2016, "Expected year to equal 2016, found \(year)")
     }

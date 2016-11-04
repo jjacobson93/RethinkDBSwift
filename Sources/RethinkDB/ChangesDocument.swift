@@ -8,12 +8,18 @@
 
 import Foundation
 
-public class ChangesDocument: Document {
+public class ChangesDocument {
+    private var document: Document
+    
+    init(document: Document) {
+        self.document = document
+    }
+    
     public var newValue: Document {
-        return self["new_val"].document
+        return self.document["new_val"].document
     }
     
     public var oldValue: Document {
-        return self["old_val"].document
+        return self.document["old_val"].document
     }
 }

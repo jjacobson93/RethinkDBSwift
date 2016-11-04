@@ -13,7 +13,7 @@ public protocol ReqlQuery: ReqlSerializable {}
 public extension ReqlQuery {
     @discardableResult
     public func run<T>(_ connection: Connection, options: GlobalArg...) throws -> T {
-        return try connection.run(self.json, options: OptArgs(options))
+        return try connection.run(self.json as! [Any], options: OptArgs(options))
     }
     
     /// Note: This is not the same as runNoReply(). We wait for a reponse from the server,
@@ -23,7 +23,7 @@ public extension ReqlQuery {
 //    }
     
     public func runNoReply(_ connection: Connection, options: GlobalArg...) throws {
-        try connection.runNoReply(self.json, options: OptArgs(options))
+        try connection.runNoReply(self.json as! [Any], options: OptArgs(options))
     }
     
     public func typeOf() -> ReqlExpr {

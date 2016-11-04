@@ -8,7 +8,9 @@
 
 import Foundation
 
-public class ReqlQueryGeometry: ReqlExpr {
+public protocol ReqlQueryGeometry: ReqlQuery {}
+
+extension ReqlQueryGeometry {
     /** Compute the distance between a point and another geometry object. At least one of the geometry objects specified
      must be a point.
      
@@ -32,10 +34,11 @@ public class ReqlQueryGeometry: ReqlExpr {
     }
 }
 
-public class ReqlQueryPolygon: ReqlQueryGeometry {
-}
+public protocol ReqlQueryPolygon: ReqlQueryGeometry {}
 
-public class ReqlQueryLine: ReqlQueryGeometry {
+public protocol ReqlQueryLine: ReqlQueryGeometry {}
+
+extension ReqlQueryLine {
     /** Convert a Line object into a Polygon object. If the last point does not specify the same coordinates as the first
      point, polygon will close the polygon by connecting them.
      
@@ -45,13 +48,11 @@ public class ReqlQueryLine: ReqlQueryGeometry {
      If the last point does not specify the same coordinates as the first point, polygon will close the polygon by
      connecting them. You cannot directly construct a polygon with holes in it using polygon, but you can use polygonSub to
      use a second polygon within the interior of the first to define a hole. */
-    public func fill() -> ReqlQueryPolygon {
-        return ReqlQueryPolygon(json: [ReqlTerm.fill.rawValue, [self.json]])
+    public func fill() -> ReqlExpr {
+        return ReqlExpr(json: [ReqlTerm.fill.rawValue, [self.json]])
     }
 }
 
-public class ReqlQueryPoint: ReqlQueryGeometry {
-    init(longitude: Double, latitude: Double) {
-        super.init(json: [ReqlTerm.point.rawValue, [longitude, latitude]])
-    }
+public protocol ReqlQueryPoint: ReqlQueryGeometry {
+    init(longitude: Double, latitude: Double)
 }

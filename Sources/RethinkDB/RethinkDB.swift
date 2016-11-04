@@ -34,7 +34,7 @@ public class RethinkDB {
     }
 
     public func point(_ longitude: Double, latitude: Double) -> ReqlQueryPoint {
-        return ReqlQueryPoint(longitude: longitude, latitude:latitude)
+        return ReqlExpr(longitude: longitude, latitude:latitude)
     }
 
     public func expr(_ string: String) -> ReqlExpr {
@@ -74,7 +74,7 @@ public class RethinkDB {
     }
 
     public func expr(_ array: [ReqlSerializable]) -> ReqlExpr {
-        return ReqlExpr(json: [ReqlTerm.makeArray.rawValue, array])
+        return ReqlExpr(json: [ReqlTerm.makeArray.rawValue, array.map({ $0.json })])
     }
 
     public func not(_ value: ReqlExpr) -> ReqlExpr {
@@ -131,6 +131,14 @@ public class RethinkDB {
 
     public func branch(_ test: ReqlExpr, ifTrue: ReqlExpr, ifFalse: ReqlExpr) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.branch.rawValue, [test.json, ifTrue.json, ifFalse.json]])
+    }
+    
+    public func array(_ values: ReqlSerializable...) -> ReqlExpr {
+        return self.array(values)
+    }
+    
+    public func array(_ array: [ReqlSerializable]) -> ReqlExpr {
+        return ReqlExpr(json: [ReqlTerm.makeArray.rawValue, array.map({ $0.json })])
     }
 
     public func object(_ pairs: ReqlSerializable...) -> ReqlExpr {
@@ -202,7 +210,7 @@ public class RethinkDB {
     Only longitude/latitude coordinates are supported. GeoJSON objects that use Cartesian coordinates, specify an altitude, 
     or specify their own coordinate reference system will be rejected. */
     public func geoJSON(_ json: ReqlSerializable) -> ReqlQueryGeometry {
-        return ReqlQueryGeometry(json: [ReqlTerm.geoJSON.rawValue, [json.json]])
+        return ReqlExpr(json: [ReqlTerm.geoJSON.rawValue, [json.json]])
     }
 
     /** Tests whether two geometry objects intersect with one another.  */
@@ -211,7 +219,7 @@ public class RethinkDB {
     }
 
     public func line(_ from: ReqlQueryPoint, to: ReqlQueryPoint) -> ReqlQueryLine {
-        return ReqlQueryLine(json: [ReqlTerm.line.rawValue, [from.json, to.json]])
+        return ReqlExpr(json: [ReqlTerm.line.rawValue, [from.json, to.json]])
     }
 
     public func asc(key: String) -> ReqlExpr {

@@ -17,7 +17,7 @@ class UpdateTests: BaseTests {
         super.setUp()
         
         do {
-            let conn = try r.connect(host: BaseTests.host)
+            let conn = try r.connect(host: Tests.host)
             let object = r.object([
                 "title": "My awesome event",
                 "time": r.now()
@@ -35,7 +35,7 @@ class UpdateTests: BaseTests {
     }
     
     func testUpdateOne() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         let newTitle = "My super awesome event"
         let update: Document = [ "title": newTitle ]
         

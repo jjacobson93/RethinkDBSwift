@@ -46,9 +46,9 @@ extension Float: ReqlSerializable {
     }
 }
 
-extension Array: ReqlSerializable {
+extension Array where Element: ReqlSerializable {
     public var json: Any {
-        return self
+        return [ReqlTerm.makeArray.rawValue, self]
     }
 }
 

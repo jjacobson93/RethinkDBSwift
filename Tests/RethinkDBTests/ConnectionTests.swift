@@ -3,24 +3,24 @@ import XCTest
 
 class ConnectionTests: BaseTests {
     func testConnectionV0_4() throws {
-        let conn = try r.connect(host: BaseTests.host, protocolVersion: .v0_4)
+        let conn = try r.connect(host: Tests.host, protocolVersion: .v0_4)
         conn.close()
     }
 
     func testConnectionV1_0() throws {
-        let conn = try r.connect(host: BaseTests.host) // .v1_0 by default
+        let conn = try r.connect(host: Tests.host) // .v1_0 by default
         conn.close()
     }
     
     func testUse() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         conn.use("galaxy")
         
         let _: Cursor<Document> = try r.table("systems").run(conn)
     }
     
     func testServerInfo() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         let info = try conn.server()
         print("Server info: \(info)")
     }

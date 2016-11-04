@@ -70,13 +70,24 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
 
         self = .nothing
     }
+    
+    public var isNothing: Bool {
+        if case .nothing = self {
+            return true
+        }
+        return false
+    }
+    
+    public var hasValue: Bool {
+        return !self.isNothing
+    }
 
     public var json: Any {
         switch self {
         case .number(let v): return v
         case .string(let v): return v
         case .document(let v): return v.json
-        case .array(let v): return v.map { $0.json }
+        case .array(let v): return [ReqlTerm.makeArray.rawValue, v.map { $0.json }]
         case .data(let v): return Document([ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeBinary, "data": v.base64EncodedString(options: [])]).json
         case .date(let v): return Document([ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeTime, "epoch_time": v.timeIntervalSince1970, "timezone": "+00:00"]).json
         case .bool(let v): return v
@@ -111,8 +122,8 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         case .string(let v): return v.debugDescription
         case .document(let v): return v.debugDescription
         case .array(let v): return v.debugDescription
-        case .data(_): return self.description
-        case .date(_): return self.description
+        case .data: return self.description
+        case .date: return self.description
         case .bool(let v): return v ? "true" : "false"
         case .null: return "<null>"
         case .nothing: return "<nothing>"

@@ -46,6 +46,19 @@ extension Document: ValueConvertible {
     }
 }
 
+extension Array: ValueConvertible {
+    public var reqlValue: ReqlValue {
+        let values = self.map { (value) -> ReqlValue in
+            if let vc = value as? ValueConvertible {
+                return vc.reqlValue
+            }
+            return .nothing
+        }
+        
+        return .array(values)
+    }
+}
+
 extension Date: ValueConvertible {
     public var reqlValue: ReqlValue {
         return .date(self)

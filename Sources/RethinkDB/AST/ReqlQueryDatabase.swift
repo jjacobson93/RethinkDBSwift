@@ -27,31 +27,31 @@ public class ReqlQueryDatabase: ReqlQuery, ExpressibleByStringLiteral {
         self.init(name: value)
     }
     
-    public func table(_ name: String, options: TableArg...) -> ReqlQueryTable {
+    public func table(_ name: String, options: TableArg...) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.table.rawValue, [self.json, name], OptArgs(options).json])
     }
     
-    public func tableCreate(_ name: String, options: TableCreateArg...) -> ReqlQuery {
+    public func tableCreate(_ name: String, options: TableCreateArg...) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.tableCreate.rawValue, [self.json, name], OptArgs(options).json])
     }
     
-    public func tableDrop(_ name: String) -> ReqlQuery {
+    public func tableDrop(_ name: String) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.tableDrop.rawValue, [self.json, name]])
     }
     
-    public func tableList() -> ReqlQuerySequence {
+    public func tableList() -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.tableList.rawValue, [self.json]])
     }
     
-    public func wait() -> ReqlQuery {
+    public func wait() -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.wait.rawValue, [self.json]])
     }
     
-    public func rebalance() -> ReqlQuery {
+    public func rebalance() -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.rebalance.rawValue, [self.json]])
     }
     
-    public func grant(_ userName: String, permissions: Permission...) -> ReqlQuery {
+    public func grant(_ userName: String, permissions: Permission...) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.grant.rawValue, [self.json, userName], OptArgs(permissions).json])
     }
 }

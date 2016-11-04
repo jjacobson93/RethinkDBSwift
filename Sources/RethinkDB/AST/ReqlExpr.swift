@@ -8,7 +8,15 @@
 
 import Foundation
 
-public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQueryStream, ReqlQueryTable {
+public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQueryStream,
+    ReqlQueryGroupedStream, ReqlQueryTable, ReqlQueryGeometry, ReqlQueryPolygon, ReqlQueryLine, ReqlQueryPoint,
+    ExpressibleByNilLiteral, ExpressibleByStringLiteral, ExpressibleByBooleanLiteral, ExpressibleByArrayLiteral,
+    ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral, ExpressibleByDictionaryLiteral {
+    
+    public typealias Element = ReqlSerializable
+    public typealias Key = String
+    public typealias Value = ReqlSerializable
+
     public var json: Any
     
     internal static let reqlTypeTime = "TIME"
@@ -27,6 +35,10 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
         self.json = string
     }
     
+    internal init(float: Float) {
+        self.json = float
+    }
+    
     internal init(double: Double) {
         self.json = double
     }
@@ -35,16 +47,44 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
         self.json = int
     }
     
+    internal init(int: Int32) {
+        self.json = int
+    }
+    
+    internal init(int: Int64) {
+        self.json = int
+    }
+    
+    internal init(int: UInt) {
+        self.json = int
+    }
+    
+    internal init(int: UInt32) {
+        self.json = int
+    }
+    
+    internal init(int: UInt64) {
+        self.json = int
+    }
+    
+    internal init(number: NSNumber) {
+        self.json = number
+    }
+    
     internal init(bool: Bool) {
         self.json = bool
     }
     
-    internal init(array: [Any]) {
-        self.json = [ReqlTerm.makeArray.rawValue, array]
+    internal init(array: [ReqlSerializable]) {
+        self.json = [ReqlTerm.makeArray.rawValue, array.map({ $0.json })]
     }
     
     internal init(document: Document) {
-        self.json = document
+        var serialized: [String: Any] = [:]
+        for (key, value) in document {
+            serialized[key] = value.json
+        }
+        self.json = serialized
     }
     
     internal init(object: [String: ReqlSerializable]) {
@@ -63,6 +103,62 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
         self.json = [ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeBinary, "data": data.base64EncodedString(options: [])]
     }
     
+//    internal init(value: ReqlValue) {
+//        switch value {
+//        case .document(let doc):
+//            self.json = ReqlExpr(document: doc).json
+//        case .array(let array):
+//            self.json = ReqlExpr(array: array).json
+//        default:
+//            self.json = value.json
+//        }
+//    }
+    
+    public convenience required init(longitude: Double, latitude: Double) {
+        self.init(json: [ReqlTerm.point.rawValue, [longitude, latitude]])
+    }
+    
+    /** Expressibles **/
+    public convenience required init(nilLiteral: ()) {
+        self.init()
+    }
+    
+    public convenience required init(stringLiteral value: String) {
+        self.init(string: value)
+    }
+    
+    public convenience required init(unicodeScalarLiteral value: String) {
+        self.init(string: value)
+    }
+    
+    public convenience required init(extendedGraphemeClusterLiteral value: String) {
+        self.init(string: value)
+    }
+    
+    public convenience required init(booleanLiteral value: Bool) {
+        self.init(bool: value)
+    }
+    
+    public convenience required init(floatLiteral value: Double) {
+        self.init(double: value)
+    }
+    
+    public convenience required init(integerLiteral value: Int64) {
+        self.init(int: value)
+    }
+    
+    public convenience required init(arrayLiteral elements: ReqlSerializable...) {
+        self.init(array: elements)
+    }
+    
+    public convenience required init(dictionaryLiteral elements: (String, ReqlSerializable)...) {
+        var dict = [String: ReqlSerializable]()
+        for (key, value) in elements {
+            dict[key] = value
+        }
+        self.init(object: dict)
+    }
+
     /** Math and Logic **/
     
     public func add(_ value: ReqlSerializable) -> ReqlExpr {
@@ -249,55 +345,55 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
 }
 
 /** Operators **/
-public func +<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func +(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.add(rhs)
 }
 
-public func -<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func -(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.sub(rhs)
 }
 
-public func *<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func *(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.mul(rhs)
 }
 
-public func /<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func /(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.div(rhs)
 }
 
-public func %<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func %(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.mod(rhs)
 }
 
-public func &&<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func &&(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.and(rhs)
 }
 
-public func ||<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func ||(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.or(rhs)
 }
 
-public func ==<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func ==(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.eq(rhs)
 }
 
-public func !=<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func !=(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.ne(rhs)
 }
 
-public func ><T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func >(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.gt(rhs)
 }
 
-public func >=<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func >=(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.ge(rhs)
 }
 
-public func <<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func <(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.lt(rhs)
 }
 
-public func <=<T: ReqlSerializable>(lhs: ReqlExpr, rhs: T) -> ReqlExpr {
+public func <=(lhs: ReqlExpr, rhs: ReqlSerializable) -> ReqlExpr {
     return lhs.le(rhs)
 }
 

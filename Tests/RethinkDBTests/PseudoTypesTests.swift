@@ -6,7 +6,7 @@ let ONE_DAY = TimeInterval(8640) //s
 
 class PseudoTypesTests: BaseTests {
     func testInsertDate() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         let doc: Document = ["title": "Dinner Date", "time": Date() + ONE_DAY]
         let result: WriteResult = try r.db("test").table("calendar").insert(doc).run(conn)
 
@@ -14,7 +14,7 @@ class PseudoTypesTests: BaseTests {
     }
 
     func testQueryDate() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         let events: Cursor<Document> = try r.db("test").table("calendar").run(conn)
 
         for event in events {
@@ -29,7 +29,7 @@ class PseudoTypesTests: BaseTests {
     }
 
     func testInsertData() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         let doc: Document = ["filename": "not_a_virus.exe", "data": Data(bytes: [1, 2, 4, 5, 3, 7, 29, 49, 59, 10, 53, 49, 59, 47, 94, 85, 74, 19, 4, 5, 6])]
         let result: WriteResult = try r.db("test").table("files").insert(doc).run(conn)
 
@@ -37,7 +37,7 @@ class PseudoTypesTests: BaseTests {
     }
 
     func testQueryData() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         let files: Cursor<Document> = try r.db("test").table("files").run(conn)
 
         for file in files {

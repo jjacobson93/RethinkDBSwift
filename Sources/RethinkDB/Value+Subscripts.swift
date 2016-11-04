@@ -13,7 +13,7 @@ extension Value {
 
         set(value) {
             switch self {
-            case .document(let doc):
+            case .document(var doc):
                 doc[key] = value
                 self = .document(doc)
             default:

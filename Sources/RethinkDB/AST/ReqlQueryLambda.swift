@@ -7,19 +7,20 @@
 //
 
 import Foundation
+import Dispatch
 
-public typealias ReqlModification = (ReqlSerializable) -> ([String: ReqlQuery])
-
-public typealias ReqlPredicate = (ReqlExpr) -> (ReqlQuery)
+public typealias ReqlModification = (ReqlSerializable) -> [String: ReqlQuery]
+public typealias ReqlPredicate1 = (ReqlExpr) -> ReqlExpr
+public typealias ReqlPredicate2 = (ReqlExpr, ReqlExpr) -> ReqlExpr
+public typealias ReqlPredicate = ReqlPredicate1
 
 public class ReqlQueryLambda: ReqlQuery {
     public let json: Any
+    private static var parameterLock = DispatchQueue(label: "io.jjacobson.RethinkDBSwift")
     private static var parameterCounter = 0
     
-    init(_ block: ReqlPredicate) {
-        ReqlQueryLambda.parameterCounter += 1
-        let p = ReqlQueryLambda.parameterCounter
-        let parameter = ReqlExpr(json: p)
+    init(_ block: ReqlPredicate1) {
+        let parameter = ReqlExpr(json: ReqlQueryLambda.nextParameter())
         let parameterAccess = ReqlExpr(json: [ReqlTerm.var.rawValue, [parameter.json]])
         
         self.json = [
@@ -30,9 +31,22 @@ public class ReqlQueryLambda: ReqlQuery {
         ]
     }
     
+    init(_ block: ReqlPredicate2) {
+        let parameter1 = ReqlExpr(json: ReqlQueryLambda.nextParameter())
+        let parameter2 = ReqlExpr(json: ReqlQueryLambda.nextParameter())
+        let parameterAccess1 = ReqlExpr(json: [ReqlTerm.var.rawValue, [parameter1.json]])
+        let parameterAccess2 = ReqlExpr(json: [ReqlTerm.var.rawValue, [parameter2.json]])
+
+        self.json = [
+            ReqlTerm.func.rawValue, [
+                [ReqlTerm.makeArray.rawValue, [parameter1.json, parameter2.json]],
+                block(parameterAccess1, parameterAccess2).json
+            ]
+        ]
+    }
+    
     init(_ block: ReqlModification) {
-        ReqlQueryLambda.parameterCounter += 1
-        let p = ReqlQueryLambda.parameterCounter
+        let p = ReqlQueryLambda.nextParameter()
         let parameter = ReqlExpr(json: p)
         let parameterAccess = ReqlExpr(json: [ReqlTerm.var.rawValue, [parameter.json]])
         
@@ -48,5 +62,12 @@ public class ReqlQueryLambda: ReqlQuery {
                 serializedChanges
             ]
         ]
+    }
+    
+    private static func nextParameter() -> Int {
+        self.parameterLock.sync {
+            self.parameterCounter += 1
+        }
+        return self.parameterCounter
     }
 }

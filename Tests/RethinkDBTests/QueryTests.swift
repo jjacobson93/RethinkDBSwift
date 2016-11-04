@@ -23,7 +23,7 @@ class QueryTests: BaseTests {
         super.setUp()
         
         do {
-            let conn = try r.connect(host: BaseTests.host)
+            let conn = try r.connect(host: Tests.host)
             var locations: [Document] = []
             for _ in 0..<25 {
                 let loc: Document = ["lat": randInt(180) - 90, "long": randInt(180)]
@@ -40,7 +40,7 @@ class QueryTests: BaseTests {
     }
     
     func testQueryTable() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         guard let locations: Cursor<Document> = try r.db("test").table("locations").run(conn) else {
             XCTFail("`locations` is not a `Cursor`.")
             return
@@ -65,7 +65,7 @@ class QueryTests: BaseTests {
     }
     
     func testDefaultDBQuery() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         guard let _: Cursor<Document> = try r.table("calendar").run(conn) else {
             XCTFail("Could not get calendar")
             return
@@ -73,7 +73,7 @@ class QueryTests: BaseTests {
     }
     
     func testQueryNoReply() throws {
-        let conn = try r.connect(host: BaseTests.host)
+        let conn = try r.connect(host: Tests.host)
         try r.db("test").table("locations").runNoReply(conn)
         try conn.noreplyWait()
     }

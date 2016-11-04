@@ -121,7 +121,7 @@ public class Connection {
         if noReply {
             _ = try self.sendQuery(query, noReply: noReply)
             guard let empty = Response.empty as? T else {
-                throw ReqlError.driverError("Cannot return value of suggested type.")
+                throw ReqlError.typeError
             }
             return empty
         }
@@ -133,7 +133,7 @@ public class Connection {
         }
         
         guard let result: T = try response.unwrap(query, connection: self) else {
-            throw ReqlError.driverError("Cannot return value of suggested type.")
+            throw ReqlError.typeError
         }
         
         return result
@@ -143,7 +143,7 @@ public class Connection {
         _ = try self.sendQuery(query, noReply: true)
     }
 
-    func run<T>(_ term: Any, options: OptArgs<GlobalArg>) throws -> T {
+    func run<T>(_ term: [Any], options: OptArgs<GlobalArg>) throws -> T {
         if !options.contains(key: "db") && self.db != "" {
             options.setArg(.db(ReqlQueryDatabase(name: self.db)))
         }
@@ -153,7 +153,7 @@ public class Connection {
         return try self.runQuery(query, noReply: noReply)
     }
     
-    func runNoReply(_ term: Any, options: OptArgs<GlobalArg>) throws {
+    func runNoReply(_ term: [Any], options: OptArgs<GlobalArg>) throws {
         options.setArg(.noReply(true))
         if !options.contains(key: "db") && self.db != "" {
             options.setArg(.db(ReqlQueryDatabase(name: self.db)))

@@ -8,37 +8,47 @@
 
 import Foundation
 
-public class WriteResult: Document {
+public struct WriteResult: __DocumentProtocolForArrayAdditions {
+    private var document: Document
+    
+    public init(element: Any) {
+        self.document = Document(element: element)
+    }
+    
+    init(document: Document) {
+        self.document = document
+    }
+
     public var deleted: Int {
-        return self["deleted"].int
+        return self.document["deleted"].int
     }
     
     public var errors: Int {
-        return self["errors"].int
+        return self.document["errors"].int
     }
     
     public var inserted: Int {
-        return self["inserted"].int
+        return self.document["inserted"].int
     }
     
     public var replaced: Int {
-        return self["replaced"].int
+        return self.document["replaced"].int
     }
     
     public var skipped: Int {
-        return self["skipped"].int
+        return self.document["skipped"].int
     }
     
     public var unchanged: Int {
-        return self["unchanged"].int
+        return self.document["unchanged"].int
     }
     
     public var generatedKeys: [String] {
-        return self["generated_keys"].array.map({ $0.string })
+        return self.document["generated_keys"].array.map({ $0.string })
     }
     
     public var changes: [ChangesDocument] {
-        return self["changes"].array.map {
+        return self.document["changes"].array.map {
             ChangesDocument(document: $0.document)
         }
     }

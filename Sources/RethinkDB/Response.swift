@@ -116,14 +116,14 @@ open class Response {
                 }
             }
             
-            return dict
+            return Document(element: dict)
         }
         
         if let arr = atom as? [Any] {
-            return arr.map({ unwrapAtom($0) })
+            return arr.map({ self.unwrapAtom($0) })
         }
         
-        return convertNumbers(atom)
+        return self.convertNumbers(atom)
     }
     
     func convertNumbers(_ atom: Any) -> Any {
@@ -139,17 +139,17 @@ open class Response {
     }
 
     func makeError(_ query: Query) -> ReqlError {
+        guard let error = self.rawResult[0] as? String else {
+            return ReqlError.driverError("Invalid JSON for result in response.")
+        }
+        
         var errorType: String = ""
         if self.type == .clientError {
             errorType = "Client Error"
         } else if self.type == .compileError {
-            errorType = "Compile Error"
+            return ReqlError.compileError(error, query.term, self.backtrace ?? [])
         } else if self.type == .runtimeError {
             errorType = "Runtime Error"
-        }
-
-        guard let error = self.rawResult[0] as? String else {
-            return ReqlError.driverError("Invalid JSON for result in response.")
         }
 
         return ReqlError.driverError("Error in response: \(errorType) - \(error) - \(query.data)")

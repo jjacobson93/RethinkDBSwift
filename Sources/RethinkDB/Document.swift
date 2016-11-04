@@ -1,4 +1,5 @@
 import Foundation
+import JSON
 
 // protocol DocumentProtocol {
 //     associatedtype Key
@@ -21,7 +22,7 @@ extension Array where Element : __DocumentProtocolForArrayAdditions {
     }
 }
 
-public class Document: Collection, ExpressibleByDictionaryLiteral, ReqlSerializable, CustomStringConvertible, CustomDebugStringConvertible {
+public struct Document: Collection, ExpressibleByDictionaryLiteral, ReqlSerializable, CustomStringConvertible, CustomDebugStringConvertible, JSONRepresentable {
     public typealias Element = (key: String, value: Value)
     public struct Index: Comparable {
         let key: String
@@ -80,28 +81,33 @@ public class Document: Collection, ExpressibleByDictionaryLiteral, ReqlSerializa
         self.storage = [:]
     }
     
-    public convenience init(document: Document) {
+    public init(document: Document) {
         self.init()
         for (key, value) in document {
             self[key] = value
         }
     }
 
-    public convenience init(_ dictionary: [String: ValueConvertible]) {
+    public init(_ dictionary: [String: ValueConvertible]) {
         self.init()
         for (key, value) in dictionary {
             self[key] = value.reqlValue
         }
     }
 
-    public convenience init(dictionaryElements elements: [(String, Value)]) {
+    public init(dictionaryElements elements: [(String, Value)]) {
         self.init()
         for (key, value) in elements {
             self[key] = value
         }
     }
 
-    public convenience required init(element: Any) {
+    public init(element: Any) {
+        if let document = element as? Document {
+            self.init(document: document)
+            return
+        }
+        
         self.init()
         guard let elements = element as? [String: Any] else {
             return
@@ -112,19 +118,23 @@ public class Document: Collection, ExpressibleByDictionaryLiteral, ReqlSerializa
         }
     }
 
-    public required convenience init(dictionaryLiteral elements: (String, ValueConvertible)...) {
+    public init(dictionaryLiteral elements: (String, ValueConvertible)...) {
         self.init(dictionaryElements: elements.map { ($0, $1.reqlValue) })
     }
     
-    public convenience init(dictionaryLiteral elements: (String, Any)...) {
-        self.init(dictionaryElements: elements.flatMap {
-            if let value = $1 as? ValueConvertible {
-                return ($0, value.reqlValue)
-            }
-            
-            return nil
-        })
+    public func encoded() -> JSON {
+        return JSON(self.json)
     }
+    
+//    public required convenience init(dictionaryLiteral elements: (String, Any)...) {
+//        self.init(dictionaryElements: elements.flatMap {
+//            if let value = $1 as? ValueConvertible {
+//                return ($0, value.reqlValue)
+//            }
+//            
+//            return nil
+//        })
+//    }
 
     public var startIndex: Index {
         let (key, value) = self.storage[self.storage.startIndex]
@@ -144,7 +154,7 @@ public class Document: Collection, ExpressibleByDictionaryLiteral, ReqlSerializa
         return nil
     }
 
-    public subscript(key: String) -> Value {
+    public subscript(key: String) -> ReqlValue {
         get {
             if let value = self.storage[key] {
                 return value
