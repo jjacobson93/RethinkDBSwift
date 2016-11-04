@@ -95,6 +95,7 @@ class JoinTests: BaseTests {
     static var allTests: [(String, (JoinTests) -> () throws -> Void)] = [
         ("testInnerJoin", testInnerJoin),
         ("testOuterJoin", testOuterJoin),
-        ("testEqJoin", testEqJoin)
+        ("testEqJoin", testEqJoin),
+        ("testZip", testZip)
     ]
 }

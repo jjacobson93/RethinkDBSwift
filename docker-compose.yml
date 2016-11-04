@@ -7,6 +7,6 @@ services:
       - RETHINKDB_HOST=db
     links:
       - rethinkdb:db
-    command: /bin/bash -c "tail -f /dev/null"
+    # command: /bin/bash -c "tail -f /dev/null"
   rethinkdb:
     image: 'library/rethinkdb'

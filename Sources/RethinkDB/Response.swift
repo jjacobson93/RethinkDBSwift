@@ -123,18 +123,6 @@ open class Response {
             return arr.map({ self.unwrapAtom($0) })
         }
         
-        return self.convertNumbers(atom)
-    }
-    
-    func convertNumbers(_ atom: Any) -> Any {
-        if let int = atom as? Int64 {
-            return NSNumber(value: int)
-        }
-        
-        if let double = atom as? Double {
-            return NSNumber(value: double)
-        }
-        
         return atom
     }
 

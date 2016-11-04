@@ -16,9 +16,9 @@ class TransformationTests: BaseTests {
     func testMap() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3]
-        let expected = [2, 4, 6]
+        let expected: [Int64] = [2, 4, 6]
         
-        let result: [Int] = try r.expr(arr).map({ expr -> (ReqlExpr) in
+        let result: [Int64] = try r.expr(arr).map({ expr -> (ReqlExpr) in
             return expr * 2
         }).run(conn)
         
@@ -37,29 +37,16 @@ class TransformationTests: BaseTests {
     func testConcatMap() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3]
-        let expected = [1, 2, 2, 4, 3, 6]
-        let result: [Int] = try r.expr(arr).concatMap({ x in [x, x.mul(2)] }).run(conn)
+        let expected: [Int64] = [1, 2, 2, 4, 3, 6]
+        let result: [Int64] = try r.expr(arr).concatMap({ x in [x, x.mul(2)] }).run(conn)
         
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
     
     func testOrderBy() throws {
         let conn = try r.connect(host: Tests.host)
-        let systems: [Document] = [
-            ["name": "Sol"],
-            ["name": "Alpha Centauri"],
-            ["name": "Gliese 581"]
-        ]
         
-        let writeResult: WriteResult = try r.db("galaxy").table("systems").insert(systems).run(conn)
-        XCTAssertEqual(writeResult.generatedKeys.count, 3, "Expected 3 generated keys, found \(writeResult.generatedKeys.count)")
-        
-        let systemsQuery = r.db("galaxy").table("systems").getAll(writeResult.generatedKeys)
-        defer {
-            let _: WriteResult? = try? systemsQuery.delete().run(conn)
-        }
-        
-        let documents: [Document] = try systemsQuery.orderBy(sortKey: "name").run(conn)
+        let documents: [Document] = try r.db("galaxy").table("systems").orderBy(sortKey: "name").run(conn)
         var prev: Document?
         for system in documents {
             if let prev = prev {
@@ -78,8 +65,8 @@ class TransformationTests: BaseTests {
     func testSkip() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        let expected = [6, 7, 8, 9, 10]
-        let result: [Int] = try r.expr(arr).skip(5).run(conn)
+        let expected: [Int64] = [6, 7, 8, 9, 10]
+        let result: [Int64] = try r.expr(arr).skip(5).run(conn)
         
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
@@ -87,8 +74,8 @@ class TransformationTests: BaseTests {
     func testLimit() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        let expected = [1, 2, 3, 4, 5]
-        let result: [Int] = try r.expr(arr).limit(5).run(conn)
+        let expected: [Int64] = [1, 2, 3, 4, 5]
+        let result: [Int64] = try r.expr(arr).limit(5).run(conn)
         
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
@@ -96,42 +83,42 @@ class TransformationTests: BaseTests {
     func testSliceFunction() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        let expected1 = [1, 2, 3, 4, 5]
-        let expected2 = [1, 2, 3, 4]
-        let expected3 = [3, 4, 5, 6, 7]
+        let expected1: [Int64] = [1, 2, 3, 4, 5]
+        let expected2: [Int64] = [1, 2, 3, 4]
+        let expected3: [Int64] = [3, 4, 5, 6, 7]
         
-        let slice1: [Int] = try r.expr(arr).slice(0, 5).run(conn)
+        let slice1: [Int64] = try r.expr(arr).slice(0, 5).run(conn)
         XCTAssertEqual(slice1, expected1, "Expected \(expected1), found \(slice1)")
         
-        let slice2: [Int] = try r.expr(arr).slice(0, 3, rightBound: .closed).run(conn)
+        let slice2: [Int64] = try r.expr(arr).slice(0, 3, rightBound: .closed).run(conn)
         XCTAssertEqual(slice2, expected2, "Expected \(expected2), found \(slice2)")
         
-        let slice3: [Int] = try r.expr(arr).slice(2, 7).run(conn)
+        let slice3: [Int64] = try r.expr(arr).slice(2, 7).run(conn)
         XCTAssertEqual(slice3, expected3, "Expected \(expected3), found \(slice3)")
     }
     
     func testSliceSubscript() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        let expected1 = [1, 2, 3, 4, 5]
-        let expected2 = [1, 2, 3, 4]
-        let expected3 = [3, 4, 5, 6, 7]
+        let expected1: [Int64] = [1, 2, 3, 4, 5]
+        let expected2: [Int64] = [1, 2, 3, 4]
+        let expected3: [Int64] = [3, 4, 5, 6, 7]
         
-        let slice1: [Int] = try r.expr(arr)[0..<5].run(conn)
+        let slice1: [Int64] = try r.expr(arr)[0..<5].run(conn)
         XCTAssertEqual(slice1, expected1, "Expected \(expected1), found \(slice1)")
         
-        let slice2: [Int] = try r.expr(arr)[0...3].run(conn)
+        let slice2: [Int64] = try r.expr(arr)[0...3].run(conn)
         XCTAssertEqual(slice2, expected2, "Expected \(expected2), found \(slice2)")
         
-        let slice3: [Int] = try r.expr(arr)[2..<7].run(conn)
+        let slice3: [Int64] = try r.expr(arr)[2..<7].run(conn)
         XCTAssertEqual(slice3, expected3, "Expected \(expected3), found \(slice3)")
     }
     
     func testNthFunction() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3]
-        let expected = 2
-        let result: Int = try r.expr(arr).nth(1).run(conn)
+        let expected: Int64 = 2
+        let result: Int64 = try r.expr(arr).nth(1).run(conn)
         
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
@@ -139,8 +126,8 @@ class TransformationTests: BaseTests {
     func testNthSubscript() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3]
-        let expected = 2
-        let result: Int = try r.expr(arr)[1].run(conn)
+        let expected: Int64 = 2
+        let result: Int64 = try r.expr(arr)[1].run(conn)
         
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
@@ -148,8 +135,8 @@ class TransformationTests: BaseTests {
     func testOffsetsOf() throws {
         let conn = try r.connect(host: Tests.host)
         let arr = ["a", "b", "c"]
-        let expected = [2]
-        let result: [Int] = try r.expr(arr).offsetsOf("c").run(conn)
+        let expected: [Int64] = [2]
+        let result: [Int64] = try r.expr(arr).offsetsOf("c").run(conn)
         
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
@@ -165,8 +152,8 @@ class TransformationTests: BaseTests {
     
     func testUnion() throws {
         let conn = try r.connect(host: Tests.host)
-        let expected = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        let result: [Int] = try r.expr([1, 2]).union([3, 4], [5, 6], [7, 8, 9]).run(conn)
+        let expected: [Int64] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        let result: [Int64] = try r.expr([1, 2]).union([3, 4], [5, 6], [7, 8, 9]).run(conn)
         XCTAssertEqual(result, expected, "Expected \(expected), found \(result)")
     }
     
@@ -174,7 +161,7 @@ class TransformationTests: BaseTests {
         let conn = try r.connect(host: Tests.host)
         let arr = [1, 2, 3, 4, 5]
         let count = 2
-        let result: [Int] = try r.expr(arr).sample(count).run(conn)
+        let result: [Int64] = try r.expr(arr).sample(count).run(conn)
         XCTAssertEqual(result.count, count, "Expected \(count), found \(result.count)")
     }
     

@@ -8,5 +8,8 @@ XCTMain([
     testCase(MathAndLogicTests.allTests),
     testCase(PseudoTypesTests.allTests),
     testCase(QueryTests.allTests),
-    testCase(UpdateTests.allTests)
+    testCase(UpdateTests.allTests),
+    testCase(AggregationTests.allTests),
+    testCase(JoinTests.allTests),
+    testCase(TransformationTests.allTests)
 ])

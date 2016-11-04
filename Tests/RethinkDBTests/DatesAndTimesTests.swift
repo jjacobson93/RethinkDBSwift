@@ -62,37 +62,37 @@ class DatesAndTimesTests: BaseTests {
     }
     
     func testYear() throws {
-        let year: Int = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").year().run(conn)
+        let year: Int64 = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").year().run(conn)
         
         XCTAssert(year == 2016, "Expected year to equal 2016, found \(year)")
     }
     
     func testMonth() throws {
-        let month: Int = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").month().run(conn)
+        let month: Int64 = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").month().run(conn)
         
         XCTAssert(month == 8, "Expected month to equal 8, found \(month)")
     }
     
     func testDay() throws {
-        let day: Int = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").day().run(conn)
+        let day: Int64 = try r.time(year: 2016, month: 8, day: 10, timezone: "Z").day().run(conn)
         
         XCTAssert(day == 10, "Expected day to equal 10, found \(day)")
     }
     
     func testHours() throws {
-        let hours: Int = try r.time(year: 2016, month: 8, day: 10, hour: 18, timezone: "Z").hours().run(conn)
+        let hours: Int64 = try r.time(year: 2016, month: 8, day: 10, hour: 18, timezone: "Z").hours().run(conn)
         
         XCTAssert(hours == 18, "Expected hours to equal 18, found \(hours)")
     }
     
     func testMinutes() throws {
-        let minutes: Int = try r.time(year: 2016, month: 8, day: 10, hour: 18, minute: 33, timezone: "Z").minutes().run(conn)
+        let minutes: Int64 = try r.time(year: 2016, month: 8, day: 10, hour: 18, minute: 33, timezone: "Z").minutes().run(conn)
         
         XCTAssert(minutes == 33, "Expected hours to equal 33, found \(minutes)")
     }
     
     func testSeconds() throws {
-        let seconds: Int = try r.time(year: 2016, month: 8, day: 10, hour: 18, minute: 33, second: 59, timezone: "Z").seconds().run(conn)
+        let seconds: Int64 = try r.time(year: 2016, month: 8, day: 10, hour: 18, minute: 33, second: 59, timezone: "Z").seconds().run(conn)
         
         XCTAssert(seconds == 59, "Expected seconds to equal 59, found \(seconds)")
     }

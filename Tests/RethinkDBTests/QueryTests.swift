@@ -81,7 +81,8 @@ class QueryTests: BaseTests {
     static var allTests : [(String, (QueryTests) -> () throws -> Void)] {
         return [
             ("testQueryTable", testQueryTable),
-            ("testDefaultDBQuery", testDefaultDBQuery)
+            ("testDefaultDBQuery", testDefaultDBQuery),
+            ("testQueryNoReply", testQueryNoReply)
         ]
     }
 }
