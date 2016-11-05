@@ -1,6 +1,4 @@
 import Foundation
-import SCRAM
-import SHA2
 import Cryptor
 import JSON
 
@@ -91,11 +89,11 @@ class HandshakeV0_4: Handshake {
 class HandshakeV1_0: Handshake {
 
     var nonce: String = ""
-    var scram: SCRAMClient<SHA2<SHA256>>
+    var scram: SCRAMClient
     var serverSignature: [UInt8]?
 
     override init(user: String, password: String) throws {
-        self.scram = SCRAMClient<SHA2<SHA256>>()
+        self.scram = SCRAMClient(algorithm: HMAC.Algorithm.sha256)
 
         try super.init(user: user, password: password)
 
@@ -203,10 +201,6 @@ class HandshakeV1_0: Handshake {
         guard let data = response else {
             throw ReqlError.driverError("Empty response from server.")
         }
-
-//        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-//            throw ReqlError.driverError("Invalid JSON response.")
-//        }
         
         guard let json = try JSON.from(data).decode() as? [String: Any] else {
             throw ReqlError.driverError("Invalid JSON response.")
@@ -233,9 +227,6 @@ class HandshakeV1_0: Handshake {
 
     func generateRandomNonce() throws -> String {
         let randomBytes = try Random.generate(byteCount: 18)
-//        _  = nonce.withUnsafeMutableBytes { (bytes: UnsafeMutablePointer<UInt8>) in 
-//            SecRandomCopyBytes(kSecRandomDefault, nonce.count, bytes)
-//        }
         return Data(bytes: randomBytes).base64EncodedString()
     }
 }

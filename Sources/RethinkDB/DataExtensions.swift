@@ -6,6 +6,12 @@ internal extension Data {
         return Data(bytes: [0x00])
     }
     
+    var byteArray: [UInt8] {
+        return self.withUnsafeBytes {
+            [UInt8](UnsafeBufferPointer(start: $0, count: self.count))
+        }
+    }
+    
     static func withLittleEndianOf(_ int: UInt64) -> Data {
         var le = int.littleEndian
         let buffer = UnsafeBufferPointer(start: &le, count: 1)
