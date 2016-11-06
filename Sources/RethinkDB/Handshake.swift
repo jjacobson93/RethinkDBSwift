@@ -1,6 +1,6 @@
 import Foundation
 import Cryptor
-import JSON
+import WarpCore
 
 class Handshake {
     enum State {

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import JSON
+import WarpCore
 
 extension JSON {
     

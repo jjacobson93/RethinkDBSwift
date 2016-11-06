@@ -1,5 +1,5 @@
 import Foundation
-import JSON
+import WarpCore
 
 open class Response {
 

@@ -1,5 +1,5 @@
 import Foundation
-import JSON
+import WarpCore
 
 enum ReqlQueryType: Int {
     case start =  1
