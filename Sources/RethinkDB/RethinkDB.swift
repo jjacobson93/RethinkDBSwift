@@ -32,6 +32,18 @@ public class RethinkDB {
     public func table(_ name: String, options: TableArg...) -> ReqlExpr {
         return ReqlExpr(json: [ReqlTerm.table.rawValue, [name], OptArgs(options).json])
     }
+    
+    public func tableCreate(_ name: String, options: TableCreateArg...) -> ReqlExpr {
+        return ReqlExpr(json: [ReqlTerm.tableCreate.rawValue, [self.json, name], OptArgs(options).json])
+    }
+    
+    public func tableDrop(_ name: String) -> ReqlExpr {
+        return ReqlExpr(json: [ReqlTerm.tableDrop.rawValue, [self.json, name]])
+    }
+    
+    public func tableList() -> ReqlExpr {
+        return ReqlExpr(json: [ReqlTerm.tableList.rawValue, [self.json]])
+    }
 
     public func point(_ longitude: Double, latitude: Double) -> ReqlExpr {
         return ReqlExpr(longitude: longitude, latitude:latitude)
