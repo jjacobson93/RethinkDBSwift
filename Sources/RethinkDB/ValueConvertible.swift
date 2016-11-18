@@ -10,7 +10,7 @@ extension Bool: ValueConvertible {
     }
 }
 
-extension NSNumber: ValueConvertible {
+extension Number: ValueConvertible {
     public var reqlValue: ReqlValue {
         return .number(self)
     }
@@ -18,19 +18,31 @@ extension NSNumber: ValueConvertible {
 
 extension Int: ValueConvertible {
     public var reqlValue: ReqlValue {
-        return .number(NSNumber(value: self))
+        return .number(.int(Int64(self)))
     }
 }
 
 extension Int64: ValueConvertible {
     public var reqlValue: ReqlValue {
-        return .number(NSNumber(value: self))
+        return .number(.int(self))
+    }
+}
+
+extension UInt: ValueConvertible {
+    public var reqlValue: ReqlValue {
+        return .number(.uint(UInt64(self)))
+    }
+}
+
+extension UInt64: ValueConvertible {
+    public var reqlValue: ReqlValue {
+        return .number(.uint(self))
     }
 }
 
 extension Double: ValueConvertible {
     public var reqlValue: ReqlValue {
-        return .number(NSNumber(value: self))
+        return .number(.double(self))
     }
 }
 
@@ -88,8 +100,8 @@ extension ReqlValue: ValueConvertible {
 }
 
 // Grr: This might be an issue with SwiftyJSON not converting NSString objects
-extension NSString: ValueConvertible {
-    public var reqlValue: ReqlValue {
-        return .string(self.description)
-    }
-}
+//extension NSString: ValueConvertible {
+//    public var reqlValue: ReqlValue {
+//        return .string(self.description)
+//    }
+//}

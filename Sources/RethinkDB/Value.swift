@@ -1,7 +1,7 @@
 import Foundation
 
 public enum Value {
-    case number(NSNumber)
+    case number(Number)
     case string(String)
     case document(Document)
     case array([Value])
@@ -13,7 +13,6 @@ public enum Value {
 }
 
 extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringConvertible {
-
     public init(_ value: Any) {
         if let value = value as? [Any] {
             var array = [ReqlValue]()
@@ -58,10 +57,10 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         }
         
         // Bool is a special case. Converting to a ValueConvertible will convert into NSNumber
-        if let value = value as? Bool {
-            self = .bool(value)
-            return
-        }
+//        if let value = value as? Bool {
+//            self = .bool(value)
+//            return
+//        }
 
         if let value = value as? ValueConvertible {
             self = value.reqlValue
@@ -129,18 +128,63 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         case .nothing: return "<nothing>"
         }
     }
+    
+    public var number: Number {
+        guard let num = self.storedValue as? Number else {
+            return .double(0)
+        }
+        return num
+    }
 
-    public var int: Int {
-        switch self {
-        case .number(let v): return v.intValue
-        default: return 0
+    public var int: Int64 {
+        guard let num = self.storedValue as? Number else {
+            return 0
+        }
+        
+        switch num {
+        case .int(let i): return i
+        case .uint(let u): return Int64(u)
+        case .float(let f): return Int64(f)
+        case .double(let d): return Int64(d)
+        }
+    }
+    
+    public var uint: UInt64 {
+        guard let num = self.storedValue as? Number else {
+            return 0
+        }
+        
+        switch num {
+        case .int(let i): return UInt64(i)
+        case .uint(let u): return u
+        case .float(let f): return UInt64(f)
+        case .double(let d): return UInt64(d)
+        }
+    }
+    
+    public var float: Float {
+        guard let num = self.storedValue as? Number else {
+            return 0
+        }
+        
+        switch num {
+        case .int(let i): return Float(i)
+        case .uint(let u): return Float(u)
+        case .float(let f): return f
+        case .double(let d): return Float(d)
         }
     }
 
     public var double: Double {
-        switch self {
-        case .number(let v): return v.doubleValue
-        default: return 0
+        guard let num = self.storedValue as? Number else {
+            return 0
+        }
+        
+        switch num {
+        case .int(let i): return Double(i)
+        case .uint(let u): return Double(u)
+        case .float(let f): return Double(f)
+        case .double(let d): return d
         }
     }
     
@@ -199,20 +243,63 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         }
     }
     
-    public var intValue: Int? {
-        return (self.storedValue as? NSNumber)?.intValue
+    public var numberValue: Number? {
+        guard let num = self.storedValue as? Number else {
+            return nil
+        }
+        return num
     }
     
-    public var uintValue: UInt? {
-        return (self.storedValue as? NSNumber)?.uintValue
+    public var intValue: Int64? {
+        guard let num = self.storedValue as? Number else {
+            return nil
+        }
+        
+        switch num {
+        case .int(let i): return i
+        case .uint(let u): return Int64(u)
+        case .float(let f): return Int64(f)
+        case .double(let d): return Int64(d)
+        }
+    }
+    
+    public var uintValue: UInt64? {
+        guard let num = self.storedValue as? Number else {
+            return nil
+        }
+        
+        switch num {
+        case .int(let i): return UInt64(i)
+        case .uint(let u): return u
+        case .float(let f): return UInt64(f)
+        case .double(let d): return UInt64(d)
+        }
     }
 
     public var doubleValue: Double? {
-        return (self.storedValue as? NSNumber)?.doubleValue
+        guard let num = self.storedValue as? Number else {
+            return nil
+        }
+        
+        switch num {
+        case .int(let i): return Double(i)
+        case .uint(let u): return Double(u)
+        case .float(let f): return Double(f)
+        case .double(let d): return d
+        }
     }
     
     public var floatValue: Float? {
-        return (self.storedValue as? NSNumber)?.floatValue
+        guard let num = self.storedValue as? Number else {
+            return nil
+        }
+        
+        switch num {
+        case .int(let i): return Float(i)
+        case .uint(let u): return Float(u)
+        case .float(let f): return f
+        case .double(let d): return Float(d)
+        }
     }
 
     public var stringValue: String? {

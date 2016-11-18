@@ -84,9 +84,3 @@ extension JSON {
         }
     }
 }
-
-extension NSNumber: JSONRepresentable {
-    public func encoded() -> JSON {
-        return .double(self.doubleValue)
-    }
-}

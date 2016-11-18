@@ -67,7 +67,7 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
         self.json = int
     }
     
-    internal init(number: NSNumber) {
+    internal init(number: Number) {
         self.json = number
     }
     

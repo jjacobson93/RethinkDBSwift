@@ -19,27 +19,27 @@ public struct WriteResult: __DocumentProtocolForArrayAdditions {
         self.document = document
     }
 
-    public var deleted: Int {
+    public var deleted: Int64 {
         return self.document["deleted"].int
     }
     
-    public var errors: Int {
+    public var errors: Int64 {
         return self.document["errors"].int
     }
     
-    public var inserted: Int {
+    public var inserted: Int64 {
         return self.document["inserted"].int
     }
     
-    public var replaced: Int {
+    public var replaced: Int64 {
         return self.document["replaced"].int
     }
     
-    public var skipped: Int {
+    public var skipped: Int64 {
         return self.document["skipped"].int
     }
     
-    public var unchanged: Int {
+    public var unchanged: Int64 {
         return self.document["unchanged"].int
     }
     

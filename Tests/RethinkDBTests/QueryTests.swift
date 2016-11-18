@@ -26,7 +26,7 @@ class QueryTests: BaseTests {
             let conn = try r.connect(host: Tests.host)
             var locations: [Document] = []
             for _ in 0..<25 {
-                let loc: Document = ["lat": randInt(180) - 90, "long": randInt(180)]
+                let loc: Document = ["lat": Double(randInt(180)) - 90, "long": Double(randInt(180))]
                 locations.append(loc)
             }
             

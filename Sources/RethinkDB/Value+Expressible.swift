@@ -1,14 +1,14 @@
 import Foundation
 
 extension Value: ExpressibleByIntegerLiteral {
-    public init(integerLiteral: Int) {
-        self = .number(NSNumber(value: integerLiteral))
+    public init(integerLiteral value: Int64) {
+        self = .number(.int(value))
     }
 }
 
 extension Value: ExpressibleByFloatLiteral {
-    public init(floatLiteral: Double) {
-        self = .number(NSNumber(value: floatLiteral))
+    public init(floatLiteral value: Double) {
+        self = .number(.double(value))
     }
 }
 
