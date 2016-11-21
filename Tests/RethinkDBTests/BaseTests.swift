@@ -12,30 +12,34 @@ let r = RethinkDB.r
 class Tests {
     static var count: Int = 0
     static var dbs: [String: [String]] = [
-        "galaxy": ["systems", "stars", "planets"],
+        "galaxy": ["systems", "stars", "planets", "systemTypes"],
         "test": ["locations", "calendar", "files", "contacts"]
     ]
     
     static var dummyData: [String: [String: [Document]]] = [
         "galaxy": [
             "systems": [
-                ["name": "Sol", "distanceFromEarth": 1.581e-5, "stars": ["Sol"]],
-                ["name": "Gliese 581", "distanceFromEarth": 20.22, "stars": ["Gliese 581"]],
-                ["name": "Sirius", "distanceFromEarth": 8.611, "stars": ["Sirius A", "Sirius B"]],
+                ["name": "Sol", "distanceFromEarth": 1.581e-5, "stars": ["Sol"], "type": "A"],
+                ["name": "Gliese 581", "distanceFromEarth": 20.22, "stars": ["Gliese 581"], "type": "C"],
+                ["name": "Sirius", "distanceFromEarth": 8.611, "stars": ["Sirius A", "Sirius B"], "type": "B"],
             ],
             "stars": [
                 ["name": "Sol", "mass": 1],
                 ["name": "Gliese 581", "mass": 0.31],
                 ["name": "Sirius A", "mass": 2.02],
                 ["name": "Sirius B", "mass": 0.978]
+            ],
+            "systemTypes": [
+                ["name": "A"], ["name": "B"], ["name": "C"],
             ]
         ]
     ]
     
     static var indices: [String: [String: [String]]] = [
         "galaxy": [
-            "systems": ["name"],
-            "stars": ["name"]
+            "systems": ["name", "type"],
+            "stars": ["name"],
+            "systemTypes": ["name"]
         ]
     ]
     

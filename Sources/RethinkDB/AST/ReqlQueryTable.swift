@@ -117,7 +117,8 @@ extension ReqlQueryTable {
     }
     
     public func getAll(_ keys: [ReqlSerializable], index: String = "id") -> ReqlExpr {
-        return ReqlExpr(json: [ReqlTerm.getAll.rawValue, [self.json] + keys.map({$0.json}), ["index": index]])
+        let args: [Any] = [ReqlTerm.makeArray.rawValue, keys.map({$0.json})]
+        return ReqlExpr(json: [ReqlTerm.getAll.rawValue, [self.json, args], ["index": index]])
     }
     
     public func between(_ lower: ReqlSerializable, _ upper: ReqlSerializable) -> ReqlExpr {

@@ -74,6 +74,29 @@ class JoinTests: BaseTests {
         }
     }
     
+    func testConcatMapJoin() throws {
+        let conn = try r.connect(host: Tests.host)
+        
+        do {
+            let results: Cursor<Document> = try r.db("galaxy").table("systems")
+                .concatMap({ (row) -> ReqlExpr in
+                    return r.db("galaxy").table("systemTypes")
+                        .getAll(row["type"], index: "name")
+                        .map({ (t) -> ReqlExpr in
+                            return [ "left": row, "right": t ]
+                        })
+                })
+                .run(conn)
+            for result in results {
+                print("Result: \(result)")
+            }
+
+        } catch let error as ReqlError {
+            print("Error: \(error)")
+            throw error
+        }
+    }
+    
     func testZip() throws {
         let conn = try r.connect(host: Tests.host)
         

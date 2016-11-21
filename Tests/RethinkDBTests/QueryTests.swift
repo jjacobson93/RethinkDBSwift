@@ -77,12 +77,33 @@ class QueryTests: BaseTests {
         try r.db("test").table("locations").runNoReply(conn)
         try conn.noreplyWait()
     }
+    
+    func testQueryArrayChild() throws {
+        let conn = try r.connect(host: Tests.host)
+        guard let cursor: Cursor<Document> = try r.db("galaxy").table("systems").run(conn) else {
+            XCTFail("Could not query systems.")
+            return
+        }
+        
+        for doc in cursor {
+            guard let stars = doc["stars"].arrayValue else {
+                XCTFail("Expected `stars` to be an array, but it is either nil or not an array.")
+                return
+            }
+            
+            for star in stars {
+                print("star: \(star)")
+                XCTAssertNotNil(star.stringValue, "Expected star to be a string, found \(star)")
+            }
+        }
+    }
 
     static var allTests : [(String, (QueryTests) -> () throws -> Void)] {
         return [
             ("testQueryTable", testQueryTable),
             ("testDefaultDBQuery", testDefaultDBQuery),
-            ("testQueryNoReply", testQueryNoReply)
+            ("testQueryNoReply", testQueryNoReply),
+            ("testQueryArrayChild", testQueryArrayChild)
         ]
     }
 }
