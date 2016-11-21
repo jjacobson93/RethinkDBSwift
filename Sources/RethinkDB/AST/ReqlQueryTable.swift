@@ -121,8 +121,8 @@ extension ReqlQueryTable {
         return ReqlExpr(json: [ReqlTerm.getAll.rawValue, [self.json, args], ["index": index]])
     }
     
-    public func between(_ lower: ReqlSerializable, _ upper: ReqlSerializable) -> ReqlExpr {
-        return ReqlExpr(json: [ReqlTerm.between.rawValue, [self.json, lower.json, upper.json]])
+    public func between(_ lower: ReqlSerializable, _ upper: ReqlSerializable, index: String = "id") -> ReqlExpr {
+        return ReqlExpr(json: [ReqlTerm.between.rawValue, [self.json, lower.json, upper.json], ["index": index]])
     }
     
     public func distinct() -> ReqlExpr {
