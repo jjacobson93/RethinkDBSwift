@@ -3,7 +3,7 @@ public enum ReqlError: Error {
     case compileError(String, [Any], [Any])
     case cursorEmpty
     case driverError(String)
-    case typeError
+    case typeError(Any, String)
 
     public var localizedDescription: String {
         switch self {
@@ -13,12 +13,12 @@ public enum ReqlError: Error {
             let queryPrinter = QueryPrinter(root: term, backtrace: backtrace)
             return "\(e)\n\(queryPrinter.printQuery())\n\(queryPrinter.printCarrots())"
         case .cursorEmpty: return "Cursor is empty"
-        case .typeError: return "Cannot coerce value to suggested type."
+        case .typeError(let value, let type): return "Cannot coerce value \(value) to suggested type \(type)."
         }
     }
 }
 
-struct QueryPrinter {
+public struct QueryPrinter {
     let root: [Any]
     let backtrace: [Any]
     

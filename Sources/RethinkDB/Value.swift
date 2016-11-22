@@ -8,6 +8,7 @@ public enum Value {
     case date(Date)
     case data(Data)
     case bool(Bool)
+    case geometry(Geometry)
     case null
     case nothing
 }
@@ -29,14 +30,19 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         }
 
         if let value = value as? [String: Any] {
-            if let reqlType = value[ReqlExpr.reqlSpecialKey] as? String {
-                if reqlType == ReqlExpr.reqlTypeTime {
+            if let reqlTypeRaw = value[ReqlType.key] as? String,
+                let reqlType = ReqlType(rawValue: reqlTypeRaw) {
+                switch reqlType {
+                case .binary:
                     self = .date(Date.from(value))
                     return
-                }
-
-                if reqlType == ReqlExpr.reqlTypeBinary {
-                    self = .data(Data.from(value))
+                case .geometry:
+                    if let geometry = Geometry.from(value) {
+                        self = .geometry(geometry)
+                        return
+                    }
+                case .time:
+                    self = .date(Date.from(value))
                     return
                 }
             }
@@ -55,12 +61,6 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
             self = .document(Document(dict))
             return
         }
-        
-        // Bool is a special case. Converting to a ValueConvertible will convert into NSNumber
-//        if let value = value as? Bool {
-//            self = .bool(value)
-//            return
-//        }
 
         if let value = value as? ValueConvertible {
             self = value.reqlValue
@@ -87,8 +87,9 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         case .string(let v): return v
         case .document(let v): return v.json
         case .array(let v): return [ReqlTerm.makeArray.rawValue, v.map { $0.json }]
-        case .data(let v): return Document([ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeBinary, "data": v.base64EncodedString(options: [])]).json
-        case .date(let v): return Document([ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeTime, "epoch_time": v.timeIntervalSince1970, "timezone": "+00:00"]).json
+        case .data(let v): return v.json
+        case .date(let v): return v.json
+        case .geometry(let v): return v.json
         case .bool(let v): return v
         case .null, .nothing: return NSNull()
         }
@@ -109,6 +110,7 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss ZZZ"
             formatter.timeZone = TimeZone(abbreviation: "UTC")
             return "Date(\"\(formatter.string(from: v))\")"
+        case .geometry(let v): return v.description
         case .bool(let v): return v.description
         case .null: return "<null>"
         case .nothing: return "<nothing>"
@@ -123,6 +125,7 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         case .array(let v): return v.debugDescription
         case .data: return self.description
         case .date: return self.description
+        case .geometry: return self.description
         case .bool(let v): return v ? "true" : "false"
         case .null: return "<null>"
         case .nothing: return "<nothing>"
@@ -222,6 +225,13 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         default: return Data()
         }
     }
+    
+    public var geometry: Geometry {
+        switch self {
+        case .geometry(let v): return v
+        default: return .point(0, 0)
+        }
+    }
 
     public var bool: Bool {
         switch self {
@@ -238,6 +248,7 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
         case .array(let val): return val
         case .date(let val): return val
         case .data(let val): return val
+        case .geometry(let val): return val
         case .bool(let val): return val
         case .null, .nothing: return nil
         }
@@ -320,6 +331,10 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
 
     public var dataValue: Data? {
         return self.storedValue as? Data
+    }
+    
+    public var geometryValue: Geometry? {
+        return self.storedValue as? Geometry
     }
 
     public var boolValue: Bool? {

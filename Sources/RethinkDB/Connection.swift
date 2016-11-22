@@ -121,7 +121,7 @@ public class Connection {
         if noReply {
             _ = try self.sendQuery(query, noReply: noReply)
             guard let empty = Response.empty as? T else {
-                throw ReqlError.typeError
+                throw ReqlError.typeError("Empty", String(describing: T.self))
             }
             return empty
         }
@@ -133,7 +133,7 @@ public class Connection {
         }
         
         guard let result: T = try response.unwrap(query, connection: self) else {
-            throw ReqlError.typeError
+            throw ReqlError.typeError(response.rawResult, String(describing: T.self))
         }
         
         return result

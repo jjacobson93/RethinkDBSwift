@@ -46,7 +46,7 @@ public class RethinkDB {
     }
 
     public func point(_ longitude: Double, latitude: Double) -> ReqlExpr {
-        return ReqlExpr(longitude: longitude, latitude:latitude)
+        return ReqlExpr(geometry: .point(longitude, latitude))
     }
 
     public func expr(_ string: String) -> ReqlExpr {

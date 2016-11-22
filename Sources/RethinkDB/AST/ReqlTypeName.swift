@@ -1,5 +1,5 @@
 //
-//  ReqlType.swift
+//  ReqlTypeName.swift
 //  RethinkDBSwift
 //
 //  Created by Jeremy Jacobson on 10/17/16.

@@ -4,6 +4,12 @@ public protocol ValueConvertible {
     var reqlValue: ReqlValue { get }
 }
 
+extension NSNull: ValueConvertible {
+    public var reqlValue: ReqlValue {
+        return .null
+    }
+}
+
 extension Bool: ValueConvertible {
     public var reqlValue: ReqlValue {
         return .bool(self)
@@ -98,10 +104,3 @@ extension ReqlValue: ValueConvertible {
         return self
     }
 }
-
-// Grr: This might be an issue with SwiftyJSON not converting NSString objects
-//extension NSString: ValueConvertible {
-//    public var reqlValue: ReqlValue {
-//        return .string(self.description)
-//    }
-//}

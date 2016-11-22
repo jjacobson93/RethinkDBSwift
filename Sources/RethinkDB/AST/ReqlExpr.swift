@@ -19,10 +19,6 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
 
     public var json: Any
     
-    internal static let reqlTypeTime = "TIME"
-    internal static let reqlTypeBinary = "BINARY"
-    internal static let reqlSpecialKey = "$reql_type$"
-    
     internal init(json: Any) {
         self.json = json
     }
@@ -96,11 +92,15 @@ public class ReqlExpr: ReqlQuery, ReqlQuerySelection, ReqlQuerySequence, ReqlQue
     }
     
     internal init(date: Date) {
-        self.json = [ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeTime, "epoch_time": date.timeIntervalSince1970, "timezone": "+00:00"]
+        self.json = date.json
     }
     
     internal init(data: Data) {
-        self.json = [ReqlExpr.reqlSpecialKey: ReqlExpr.reqlTypeBinary, "data": data.base64EncodedString(options: [])]
+        self.json = data.json
+    }
+    
+    internal init(geometry: Geometry) {
+        self.json = geometry.json
     }
     
 //    internal init(value: ReqlValue) {

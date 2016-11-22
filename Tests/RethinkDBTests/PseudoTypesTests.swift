@@ -49,13 +49,27 @@ class PseudoTypesTests: BaseTests {
             print("File: \(file)")
         }
     }
+    
+    func testPoint() throws {
+        let conn = try r.connect(host: Tests.host)
+        
+        let geo: Geometry = try r.point(10, latitude: 20).run(conn)
+        guard case let .point(long, lat) = geo else {
+            XCTFail("Expected a point, found \(geo)")
+            return
+        }
+        
+        XCTAssertEqual(long, 10)
+        XCTAssertEqual(lat, 20)
+    }
 
     static var allTests : [(String, (PseudoTypesTests) -> () throws -> Void)] {
         return [
             ("testInsertDate", testInsertDate),
             ("testQueryDate", testQueryDate),
             ("testInsertData", testInsertData),
-            ("testQueryData", testQueryData)
+            ("testQueryData", testQueryData),
+            ("testPoint", testPoint)
         ]
     }
 }

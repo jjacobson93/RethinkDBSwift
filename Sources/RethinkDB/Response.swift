@@ -108,11 +108,17 @@ open class Response {
     
     func unwrapAtom(_ atom: Any) -> Any {
         if let dict = atom as? [String: Any] {
-            if let reqlType = dict[ReqlExpr.reqlSpecialKey] as? String {
-                if reqlType == "TIME" {
+            if let reqlTypeRaw = dict[ReqlType.key] as? String,
+                let reqlType = ReqlType(rawValue: reqlTypeRaw) {
+                switch reqlType {
+                case .time:
                     return Date.from(dict)
-                } else if reqlType == "BINARY" {
+                case .binary:
                     return Data.from(dict)
+                case .geometry:
+                    if let geometry = Geometry.from(dict) {
+                        return geometry
+                    }
                 }
             }
             
