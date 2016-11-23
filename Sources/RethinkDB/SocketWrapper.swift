@@ -81,36 +81,34 @@ class SocketWrapper {
         if !self.isOpen {
             throw ReqlError.driverError("Attempting to read on a closed socket.")
         }
-
+        
         if self.buffer.count != 0 {
-            if let bufferData = self.buffer.last {
-                if bufferData.count <= bytes {
-                    var data = Data(bufferData)
-                    if bufferData.count != bytes {
-                        data.append(try self.read(bytes - bufferData.count))
-                    }
-                    self.buffer.remove(at: self.buffer.endIndex-1)
-                    return data
-                }
+            let last = self.buffer.removeLast()
+            if last.count == bytes {
+                return last
             }
-
-            if let last = self.buffer.last {
-                let data = last.subdata(in: 0..<bytes)
-                self.buffer[self.buffer.count-1] = last.subdata(in: bytes..<last.count)
+            
+            if last.count < bytes {
+                var data = Data(last)
+                data.append(try self.read(bytes - last.count))
                 return data
             }
+            
+            let data = last.subdata(in: 0..<bytes)
+            self.buffer.append(last.subdata(in: bytes..<last.count))
+            return data
         }
-
+        
         let data = try self.read()
         if data.count < bytes {
             throw ReqlError.driverError("Expected \(bytes) byte\(bytes != 1 ? "s" : "") from socket, but read \(data.count)")
         }
-
+        
         if data.count > bytes {
             self.buffer.append(data.subdata(in: bytes..<data.count))
             return data.subdata(in: 0..<bytes)
         }
-
+        
         return data
     }
 
