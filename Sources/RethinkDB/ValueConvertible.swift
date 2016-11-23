@@ -95,7 +95,13 @@ extension Data: ValueConvertible {
 
     public static func from(_ reqlObject: [String: Any]) -> Data {
         let string = reqlObject["data"] as? String ?? ""
-        return Data(base64Encoded: string) ?? Data()
+        return Data(base64Encoded: string, options: .ignoreUnknownCharacters) ?? Data()
+    }
+}
+
+extension Geometry: ValueConvertible {
+    public var reqlValue: ReqlValue {
+        return .geometry(self)
     }
 }
 
