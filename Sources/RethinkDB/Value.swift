@@ -34,7 +34,7 @@ extension Value: ReqlSerializable, CustomStringConvertible, CustomDebugStringCon
                 let reqlType = ReqlType(rawValue: reqlTypeRaw) {
                 switch reqlType {
                 case .binary:
-                    self = .date(Date.from(value))
+                    self = .data(Data.from(value))
                     return
                 case .geometry:
                     if let geometry = Geometry.from(value) {
