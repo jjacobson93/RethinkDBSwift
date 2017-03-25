@@ -139,35 +139,55 @@ public class Connection {
         guard let response = self.completedQueries.removeValue(forKey: query.token) else {
             throw ReqlError.driverError("No response from query")
         }
-        
-        guard let result: T = try response.unwrap(query, connection: self) else {
-            throw ReqlError.typeError(response.rawResult, String(describing: T.self))
+
+        return try response.unwrap(query, connection: self)
+    }
+
+    func runQuery<T: ExpressibleByNilLiteral>(_ query: Query, noReply: Bool) throws -> T {
+        if noReply {
+            _ = try self.sendQuery(query, noReply: noReply)
+            guard let empty = Response.empty as? T else {
+                throw ReqlError.typeError("Empty", String(describing: T.self))
+            }
+            return empty
         }
-        
-        return result
+
+        try self.sendQuery(query).wait()
+
+        guard let response = self.completedQueries.removeValue(forKey: query.token) else {
+            throw ReqlError.driverError("No response from query")
+        }
+
+        return try response.unwrap(query, connection: self)
     }
     
     func runQueryNoReply(_ query: Query) throws {
         _ = try self.sendQuery(query, noReply: true)
     }
 
-    func run<T>(_ term: [Any], options: OptArgs<GlobalArg>) throws -> T {
+    func setupRunQuery(_ term: [Any], options: OptArgs<GlobalArg>) throws -> (query: Query, noReply: Bool) {
         if !options.contains(key: "db") && self.db != "" {
             options.setArg(.db(ReqlQueryDatabase(name: self.db)))
         }
-        
+
         let noReply = options.get(key: "noreply") ?? false
         let query = try Query.start(self.newToken(), term: term, globalOptions: options)
+        return (query: query, noReply: noReply)
+    }
+
+    func run<T>(_ term: [Any], options: OptArgs<GlobalArg>) throws -> T {
+        let (query, noReply) = try self.setupRunQuery(term, options: options)
+        return try self.runQuery(query, noReply: noReply)
+    }
+
+    func run<T: ExpressibleByNilLiteral>(_ term: [Any], options: OptArgs<GlobalArg>) throws -> T {
+        let (query, noReply) = try self.setupRunQuery(term, options: options)
         return try self.runQuery(query, noReply: noReply)
     }
     
     func runNoReply(_ term: [Any], options: OptArgs<GlobalArg>) throws {
         options.setArg(.noReply(true))
-        if !options.contains(key: "db") && self.db != "" {
-            options.setArg(.db(ReqlQueryDatabase(name: self.db)))
-        }
-        
-        let query = try Query.start(self.newToken(), term: term, globalOptions: options)
+        let (query, _) = try self.setupRunQuery(term, options: options)
         try self.runQueryNoReply(query)
     }
 

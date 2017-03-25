@@ -4,6 +4,15 @@ public protocol ValueConvertible {
     var reqlValue: ReqlValue { get }
 }
 
+extension Optional where Wrapped: ValueConvertible {
+    public var reqlValue: ReqlValue {
+        if case .some(let w) = self {
+            return w.reqlValue
+        }
+        return .null
+    }
+}
+
 extension NSNull: ValueConvertible {
     public var reqlValue: ReqlValue {
         return .null

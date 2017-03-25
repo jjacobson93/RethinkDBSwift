@@ -62,6 +62,16 @@ class PseudoTypesTests: BaseTests {
         XCTAssertEqual(long, 10)
         XCTAssertEqual(lat, 20)
     }
+    
+    func testNull() throws {
+        let doc: Document? = try r.db("galaxy")
+            .table("systems")
+            .filter([ "thisIsNotAField": true ])[0]
+            .defaults(nil)
+            .run(conn)
+        
+        XCTAssertNil(doc)
+    }
 
     static var allTests : [(String, (PseudoTypesTests) -> () throws -> Void)] {
         return [

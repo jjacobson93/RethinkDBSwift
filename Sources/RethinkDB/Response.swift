@@ -82,28 +82,86 @@ open class Response {
 
         self.token = token
     }
-    
-    func unwrap<T>(_ query: Query, connection: Connection) throws -> T? {
+
+    func unwrap<T: ExpressibleByNilLiteral>(_ query: Query, connection: Connection) throws -> T {
         switch self.type {
         case .atom, .serverInfo:
-            let atom = self.rawResult[0]
-            let unwrapped = self.unwrapAtom(atom)
-            if let doc = Document(element: unwrapped) as? T {
-                return doc
-            }
-            
-            if let writeResult = WriteResult(element: unwrapped) as? T {
-                return writeResult
-            }
-            
-            return unwrapped as? T
+            return try self.handleAtom()
         case .sequence, .partial:
-            return Cursor<Document>(connection: connection, query: query, firstResponse: self, transform: { $0 }) as? T
+            let cursor = Cursor<Document>(connection: connection, query: query, firstResponse: self, transform: { $0 })
+            guard T.self is Optional<Cursor<Document>>.Type else {
+                throw ReqlError.typeError(cursor, String(describing: T.self))
+            }
+            return cursor as! T
         case .waitComplete:
-            return true as? T
+            guard T.self is Optional<Bool>.Type else {
+                throw ReqlError.typeError(true, String(describing: T.self))
+            }
+            return true as! T
         default:
             throw self.makeError(query)
         }
+    }
+    
+    func unwrap<T>(_ query: Query, connection: Connection) throws -> T {
+        switch self.type {
+        case .atom, .serverInfo:
+            return try self.handleAtom()
+        case .sequence, .partial:
+            let cursor = Cursor<Document>(connection: connection, query: query, firstResponse: self, transform: { $0 })
+            guard T.self is Cursor<Document>.Type else {
+                throw ReqlError.typeError(cursor, String(describing: T.self))
+            }
+            return cursor as! T
+        case .waitComplete:
+            guard T.self is Bool.Type else {
+                throw ReqlError.typeError(true, String(describing: T.self))
+            }
+            return true as! T
+        default:
+            throw self.makeError(query)
+        }
+    }
+
+    func handleAtom<T>() throws -> T {
+        let atom = self.rawResult[0]
+        let unwrapped = self.unwrapAtom(atom)
+
+        if let doc = Document(element: unwrapped) as? T {
+            return doc
+        }
+
+        if let writeResult = WriteResult(element: unwrapped) as? T {
+            return writeResult
+        }
+
+        guard let t = unwrapped as? T else {
+            throw ReqlError.typeError(unwrapped, String(describing: T.self))
+        }
+
+        return t
+    }
+
+    func handleAtom<T: ExpressibleByNilLiteral>() throws -> T {
+        let atom = self.rawResult[0]
+        let unwrapped = self.unwrapAtom(atom)
+        if unwrapped is NSNull {
+            return nil as T
+        }
+
+        if let doc = Document(element: unwrapped) as? T {
+            return doc
+        }
+
+        if let writeResult = WriteResult(element: unwrapped) as? T {
+            return writeResult
+        }
+
+        guard let t = unwrapped as? T else {
+            throw ReqlError.typeError(unwrapped, String(describing: T.self))
+        }
+
+        return t
     }
     
     func unwrapAtom(_ atom: Any) -> Any {

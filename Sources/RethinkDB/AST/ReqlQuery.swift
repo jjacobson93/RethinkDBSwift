@@ -15,6 +15,11 @@ public extension ReqlQuery {
     public func run<T>(_ connection: Connection, options: GlobalArg...) throws -> T {
         return try connection.run(self.json as! [Any], options: OptArgs(options))
     }
+
+    @discardableResult
+    public func run<T: ExpressibleByNilLiteral>(_ connection: Connection, options: GlobalArg...) throws -> T {
+        return try connection.run(self.json as! [Any], options: OptArgs(options))
+    }
     
     /// Note: This is not the same as runNoReply(). We wait for a reponse from the server,
     /// but we discard the result

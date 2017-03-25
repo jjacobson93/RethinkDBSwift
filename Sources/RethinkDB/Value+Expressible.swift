@@ -1,5 +1,11 @@
 import Foundation
 
+extension Value: ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        self = .null
+    }
+}
+
 extension Value: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int64) {
         self = .number(.int(value))
