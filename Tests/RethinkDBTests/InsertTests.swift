@@ -3,7 +3,6 @@ import XCTest
 
 class InsertTests: BaseTests {
     func testInsertOne() throws {
-        let conn = try r.connect(host: Tests.host)
         let doc: Document = ["lat": 100, "long": 10]
         guard let result: Document = try r.db("test").table("locations").insert(doc).run(conn) else {
             XCTFail("Could not insert document.")
@@ -25,7 +24,6 @@ class InsertTests: BaseTests {
     }
     
     func testInsertMultiple() throws {
-        let conn = try r.connect(host: Tests.host)
         let docs: [Document] = [
             ["lat": 180, "long": 80], ["lat": 47, "long": 75], ["lat": 29, "long": 84]
         ]

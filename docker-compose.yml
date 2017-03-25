@@ -5,8 +5,20 @@ services:
     privileged: true
     environment:
       - RETHINKDB_HOST=db
+      - CERT_FILE=/opt/ssl/cert.pem
+      - KEY_FILE=/opt/ssl/key.pem
+      # - CA_FILE=/opt/ssl/ca.pem
     links:
       - rethinkdb:db
     # command: /bin/bash -c "tail -f /dev/null"
   rethinkdb:
     image: 'library/rethinkdb'
+    volumes:
+      - ./rethinkdb.conf:/etc/rethinkdb/default.conf
+      - ./cert.pem:/opt/ssl/cert.pem
+      - ./key.pem:/opt/ssl/key.pem
+      - ./ca.pem:/opt/ssl/ca.pem
+    ports:
+      - 28015:28015
+      - 8080:8080
+    command: rethinkdb --config-file /etc/rethinkdb/default.conf

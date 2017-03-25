@@ -1,5 +1,6 @@
 import Foundation
 import Dispatch
+import SSLService
 
 public class Connection {
     var socket: SocketWrapper
@@ -19,7 +20,14 @@ public class Connection {
     var isOpen: Bool
     var nextToken: UInt64 = 1
 
-    init(host: String = "localhost", port: Int32 = 28015, db: String = "", user: String = "admin", password: String = "", authKey: String = "", version: ProtocolVersion = .v1_0) throws {
+    init(host: String = "localhost",
+         port: Int32 = 28015,
+         db: String = "",
+         user: String = "admin",
+         password: String = "",
+         authKey: String = "",
+         version: ProtocolVersion = .v1_0,
+         sslConfig: SSLService.Configuration? = nil) throws {
         self.host = host
         self.port = port
         self.db = db
@@ -31,7 +39,7 @@ public class Connection {
         self.waiters = [:]
         self.completedQueries = [:]
         // self.cursorCache = [:]
-        self.socket = try SocketWrapper(host: self.host, port: self.port)
+        self.socket = try SocketWrapper(host: self.host, port: self.port, sslConfig: sslConfig)
         self.isOpen = false
 
         switch version {

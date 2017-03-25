@@ -5,6 +5,7 @@
 #endif
 
 import XCTest
+import SSLService
 @testable import RethinkDB
 
 let r = RethinkDB.r
@@ -52,6 +53,49 @@ class Tests {
         return String(utf8String: rawValue) ?? defaultHost
     })()
     
+    static var keyFile: String? = ({
+        guard let rawValue = getenv("KEY_FILE") else {
+            return nil
+        }
+        
+        return String(utf8String: rawValue)
+    })()
+    
+    static var certFile: String? = ({
+        guard let rawValue = getenv("CERT_FILE") else {
+            return nil
+        }
+        
+        return String(utf8String: rawValue)
+    })()
+    
+    static var caFile: String? = ({
+        guard let rawValue = getenv("CA_FILE") else {
+            return nil
+        }
+        
+        return String(utf8String: rawValue)
+    })()
+    
+    static var chainFile: String? = ({
+        guard let rawValue = getenv("CHAIN_FILE") else {
+            return nil
+        }
+        
+        return String(utf8String: rawValue)
+    })()
+    
+    static var sslConfig: SSLService.Configuration? = ({
+        // #if os(Linux)
+        //     return SSLService.Configuration(withCACertificateDirectory: nil, usingCertificateFile: Tests.certFile, withKeyFile: Tests.keyFile)
+        // #else
+        //     return SSLService.Configuration(withChainFilePath: Tests.chainFile, withPassword: "Test")
+        // #endif
+        return nil
+    })()
+    
+    static var protectedUserPassword = "testing123"
+    
     static func setUp() {
         Tests.count += 1
         if self.count > 1 {
@@ -59,7 +103,7 @@ class Tests {
         }
         
         do {
-            let conn = try r.connect(host: Tests.host)
+            let conn = try r.connect(host: Tests.host, ssl: Tests.sslConfig)
             let dbList: [String] = try r.dbList().run(conn)
             for (db, tables) in Tests.dbs {
                 if !dbList.contains(db) {
@@ -92,6 +136,12 @@ class Tests {
                     
                 }
             }
+            
+            // add user with password for testing
+            let _: Document = try r.db("rethinkdb").table("users").insert([
+                "id": "protected_user",
+                "password": Tests.protectedUserPassword
+            ]).run(conn)
         } catch let error {
             fatalError("Failure setting up: \(error)")
         }
@@ -104,7 +154,7 @@ class Tests {
         }
         
         do {
-            let conn = try r.connect(host: Tests.host)
+            let conn = try r.connect(host: Tests.host, ssl: Tests.sslConfig)
             let dbList: [String] = try r.dbList().run(conn)
             for db in dbList {
                 if let _ = Tests.dbs[db] {
@@ -118,6 +168,10 @@ class Tests {
 }
 
 class BaseTests: XCTestCase {
+    var conn: Connection {
+        return try! r.connect(host: Tests.host, ssl: Tests.sslConfig)
+    }
+    
     override class func setUp() {
         super.setUp()
         Tests.setUp()
@@ -126,5 +180,9 @@ class BaseTests: XCTestCase {
     override class func tearDown() {
         super.tearDown()
         Tests.tearDown()
+    }
+    
+    deinit {
+        self.conn.close()
     }
 }

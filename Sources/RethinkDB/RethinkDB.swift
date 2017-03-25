@@ -1,10 +1,17 @@
 import Foundation
+import SSLService
 
 public class RethinkDB {
     public static var r: RethinkDB = RethinkDB()
 
-    public func connect(host: String = "localhost", port: Int32 = 28015, db: String = "", user: String = "admin", password: String = "", protocolVersion: ProtocolVersion = .v1_0) throws -> Connection {
-        let conn = try Connection(host: host, port: port, db: db, user: user, password: password, version: protocolVersion)
+    public func connect(host: String = "localhost",
+                        port: Int32 = 28015,
+                        db: String = "",
+                        user: String = "admin",
+                        password: String = "",
+                        protocolVersion: ProtocolVersion = .v1_0,
+                        ssl sslConfig: SSLService.Configuration? = nil) throws -> Connection {
+        let conn = try Connection(host: host, port: port, db: db, user: user, password: password, version: protocolVersion, sslConfig: sslConfig)
         try conn.connect()
         return conn
     }

@@ -9,6 +9,7 @@
 import Foundation
 import Cryptor
 
+/*
 public enum PBKDF2Error: Error {
     case invalidInput
 }
@@ -19,7 +20,7 @@ func ^(_ a: [UInt8], _ b: [UInt8]) -> [UInt8] {
     }
 }
 
-public final class PBKDF2 {    
+public final class PBKDF2 {
     /// Applies the `hi` (PBKDF2 with HMAC as PseudoRandom Function)
     public static func calculate(_ password: [UInt8], usingSalt salt: [UInt8], iterating iterations: Int, algorithm: HMAC.Algorithm) throws -> [UInt8] {
         
@@ -44,4 +45,4 @@ public final class PBKDF2 {
     public static func calculate(_ password: String, usingSalt salt: [UInt8], iterating iterations: Int, algorithm: HMAC.Algorithm) throws -> [UInt8] {
         return try self.calculate([UInt8](password.utf8), usingSalt: salt, iterating: iterations, algorithm: algorithm)
     }
-}
+}*/

@@ -11,12 +11,6 @@ import XCTest
 @testable import RethinkDB
 
 class DatesAndTimesTests: BaseTests {
-    var conn: Connection!
-    
-    override func setUp() {
-        super.setUp()
-        self.conn = try! r.connect(host: Tests.host)
-    }
     
     func testNow() throws {
         let object = r.object(

@@ -14,8 +14,6 @@ import XCTest
 class JoinTests: BaseTests {
 
     func testInnerJoin() throws {
-        let conn = try r.connect(host: Tests.host)
-        
         let owners: [Document] = [
             [ "name": "John", "pets": ["Fido"] ],
             [ "name": "Bill", "pets": ["Cheep", "Zipper", "Nolan"] ]
@@ -36,8 +34,6 @@ class JoinTests: BaseTests {
     }
     
     func testOuterJoin() throws {
-        let conn = try r.connect(host: Tests.host)
-        
         let owners: [Document] = [
             [ "name": "John", "pets": ["Fido"] ],
             [ "name": "Bill", "pets": ["Cheep", "Zipper", "Nolan"] ],
@@ -59,8 +55,6 @@ class JoinTests: BaseTests {
     }
     
     func testEqJoin() throws {
-        let conn = try r.connect(host: Tests.host)
-        
         let results: Cursor<Document> = try r.db("galaxy").table("systems")
             .concatMap({ (row) -> ReqlExpr in
                 return row["stars"].map({ (star) -> ReqlExpr in
@@ -75,8 +69,6 @@ class JoinTests: BaseTests {
     }
     
     func testConcatMapJoin() throws {
-        let conn = try r.connect(host: Tests.host)
-        
         do {
             let results: Cursor<Document> = try r.db("galaxy").table("systems")
                 .concatMap({ (row) -> ReqlExpr in
@@ -98,8 +90,6 @@ class JoinTests: BaseTests {
     }
     
     func testZip() throws {
-        let conn = try r.connect(host: Tests.host)
-        
         let results: Cursor<Document> = try r.db("galaxy").table("systems")
             .concatMap({ (row) -> ReqlExpr in
                 return row["stars"].map({ (star) -> ReqlExpr in

@@ -1,6 +1,12 @@
 import Foundation
 import Cryptor
 
+func ^(_ a: [UInt8], _ b: [UInt8]) -> [UInt8] {
+    return zip(a, b).map { (x, y) in
+        return x ^ y
+    }
+}
+
 let CLIENT_KEY = [UInt8]("Client Key".utf8)
 let SERVER_KEY = [UInt8]("Server Key".utf8)
 
@@ -86,7 +92,7 @@ final public class SCRAMClient {
         return "\(gs2BindFlag)n=\(fixUsername(username: username)),r=\(nonce)"
     }
     
-    public func process(_ challenge: String, with details: (username: String, password: [UInt8]), usingNonce nonce: String) throws -> (proof: String, serverSignature: [UInt8]) {
+    public func process(_ challenge: String, with details: (username: String, password: String), usingNonce nonce: String) throws -> (proof: String, serverSignature: [UInt8]) {
         let encodedHeader = Data(gs2BindFlag.utf8).base64EncodedString()
         
         let parsedResponse = try parse(challenge: challenge)
@@ -103,7 +109,8 @@ final public class SCRAMClient {
             throw SCRAMError.base64Failure(original: parsedResponse.salt)
         }
         
-        let saltedPassword = try PBKDF2.calculate(details.password, usingSalt: salt, iterating: parsedResponse.iterations, algorithm: self.algorithm)
+        //let saltedPassword = try PBKDF2.calculate(details.password, usingSalt: salt, iterating: parsedResponse.iterations, algorithm: self.algorithm)
+        let saltedPassword = PBKDF.deriveKey(fromPassword: details.password, salt: salt, prf: .sha256, rounds: UInt32(parsedResponse.iterations), derivedKeyLength: UInt(Cryptor.Algorithm.aes256.defaultKeySize))
         
         let clientKey = try SCRAMClient.hmac(key: saltedPassword, message: CLIENT_KEY)
         let serverKey = try SCRAMClient.hmac(key: saltedPassword, message: SERVER_KEY)
@@ -116,7 +123,7 @@ final public class SCRAMClient {
         let authMessageBytes = [UInt8](authMessage.utf8)
         
         let clientSignature = try SCRAMClient.hmac(key: storedKey, message: authMessageBytes)
-        let clientProof = clientKey ^ clientSignature
+        let clientProof = zip(clientKey, clientSignature).map({ $0 ^ $1 })
         let serverSignature = try SCRAMClient.hmac(key: serverKey, message: authMessageBytes)
         
         let proof = Data(bytes: clientProof).base64EncodedString()

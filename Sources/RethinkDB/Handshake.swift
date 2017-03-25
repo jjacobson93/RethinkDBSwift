@@ -171,8 +171,8 @@ class HandshakeV1_0: Handshake {
             throw ReqlError.authError("Invalid authentication server first message.")
         }
 
-        let passwordBytes = [UInt8](self.password.utf8)
-        let clientProof = try self.scram.process(serverFirstMessage, with: (username: self.user, password: passwordBytes), usingNonce: self.nonce)
+        //let passwordBytes = [UInt8](self.password.utf8)
+        let clientProof = try self.scram.process(serverFirstMessage, with: (username: self.user, password: self.password), usingNonce: self.nonce)
 
         var data = try JSON.data(with: [ "authentication": clientProof.proof ])
 
@@ -215,7 +215,7 @@ class HandshakeV1_0: Handshake {
 
     func handleError(_ json: [String: Any]) -> ReqlError {
         if let error = json["error"] as? String {
-            if let errorCode = json["error_code"] as? Int, 10 ... 20 ~= errorCode {
+            if let errorCode = json["error_code"] as? Int64, 10 ... 20 ~= errorCode {
                 return ReqlError.authError("Authentication error: \(error)")
             }
 

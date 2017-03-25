@@ -1,5 +1,6 @@
 import Foundation
 import Socket
+import SSLService
 
 class SocketWrapper {
 
@@ -7,13 +8,21 @@ class SocketWrapper {
     private var host: String
     private var port: Int32
     private var buffer: [Data]
+    private var ssl: SSLService?
 
     public var isOpen: Bool {
         return self.socket.isConnected
     }
 
-    init(host: String, port: Int32) throws {
+    init(host: String, port: Int32, sslConfig: SSLService.Configuration? = nil) throws {
+        if let sslConfig = sslConfig, let ssl = try SSLService(usingConfiguration: sslConfig) {
+            self.ssl = ssl
+        } else if sslConfig != nil {
+            throw ReqlError.driverError("Invalid SSL Configuration")
+        }
+        
         self.socket = try Socket.create()
+        self.socket.delegate = self.ssl
         self.host = host
         self.port = port
         self.buffer = []
