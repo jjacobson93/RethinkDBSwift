@@ -13,12 +13,22 @@ public class Connection {
     var dispatchError: Error?
     var responseQueue: DispatchQueue
     var queryQueue: DispatchQueue
-    var lockQueue: DispatchQueue
+    var tokenLockQueue: DispatchQueue
+    var acceptQueriesLockQueue: DispatchQueue
     var waiters: [UInt64: DispatchSemaphore]
     var completedQueries: [UInt64: Response]
     // var cursorCache: [UInt64: Cursor<Any>]
     var isOpen: Bool
+    var acceptQueries: Bool
     var nextToken: UInt64 = 1
+
+    var isAcceptingQueries: Bool {
+        var value: Bool = false
+        self.acceptQueriesLockQueue.sync {
+            value = self.acceptQueries
+        }
+        return value
+    }
 
     init(host: String = "localhost",
          port: Int32 = 28015,
@@ -35,12 +45,14 @@ public class Connection {
         self.password = password
         self.responseQueue = DispatchQueue(label: "io.jjacobson.swift.RethinkDB.response")
         self.queryQueue = DispatchQueue(label: "io.jjacobson.swift.RethinkDB.query")
-        self.lockQueue = DispatchQueue(label: "io.jjacobson.swift.RethinkDB.lock")
+        self.tokenLockQueue = DispatchQueue(label: "io.jjacobson.swift.RethinkDB.tokenLock")
+        self.acceptQueriesLockQueue = DispatchQueue(label: "io.jjacobson.swift.RethinkDB.acceptQueriesLock")
         self.waiters = [:]
         self.completedQueries = [:]
         // self.cursorCache = [:]
         self.socket = try SocketWrapper(host: self.host, port: self.port, sslConfig: sslConfig)
         self.isOpen = false
+        self.acceptQueries = false
 
         switch version {
         case .v0_4:
@@ -57,6 +69,7 @@ public class Connection {
     public func connect() throws {
         try socket.connect(self.handshake)
         self.isOpen = true
+        self.acceptQueries = true
 
         // Asynchronously read responses from the server
         self.responseQueue.async {
@@ -84,7 +97,14 @@ public class Connection {
         }
     }
 
-    public func close() {
+    public func close(waitForResponses: Bool = false) {
+        if waitForResponses {
+            self.acceptQueries = false
+            for waiter in self.waiters.values {
+                waiter.wait()
+            }
+        }
+
         if !self.isOpen {
             return
         }
@@ -108,6 +128,10 @@ public class Connection {
     func sendQuery(_ query: Query, noReply: Bool) throws -> DispatchSemaphore {
         if !self.isOpen {
             throw ReqlError.driverError("Cannot write query because connection is closed.")
+        }
+
+        if !self.isAcceptingQueries {
+            throw ReqlError.driverError("Cannot accept queries. Driver is in the process of closing and waiting for responses to be received.")
         }
 
         let writeQuery = {
@@ -212,7 +236,7 @@ public class Connection {
 
     func newToken() -> UInt64 {
         var token: UInt64 = 0
-        lockQueue.sync {
+        self.tokenLockQueue.sync {
             token = nextToken
             self.nextToken += 1
         }

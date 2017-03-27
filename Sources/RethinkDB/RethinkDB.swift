@@ -3,6 +3,10 @@ import SSLService
 
 public class RethinkDB {
     public static var r: RethinkDB = RethinkDB()
+    public var connectionPool: ConnectionPool?
+
+    // make the constructor private, forcing use of `r`
+    private init() {}
 
     public func connect(host: String = "localhost",
                         port: Int32 = 28015,
@@ -14,6 +18,19 @@ public class RethinkDB {
         let conn = try Connection(host: host, port: port, db: db, user: user, password: password, version: protocolVersion, sslConfig: sslConfig)
         try conn.connect()
         return conn
+    }
+
+    public func pool(size: Int = 10,
+                     host: String = "localhost",
+                     port: Int32 = 28015,
+                     db: String = "",
+                     user: String = "admin",
+                     password: String = "",
+                     protocolVersion: ProtocolVersion = .v1_0,
+                     ssl sslConfig: SSLService.Configuration? = nil) throws -> ConnectionPool {
+        let pool = ConnectionPool(size: size, host: host, port: port, db: db, user: user, password: password, version: protocolVersion, sslConfig: sslConfig)
+        try pool.connect()
+        return pool
     }
 
     public func uuid() -> ReqlExpr {
