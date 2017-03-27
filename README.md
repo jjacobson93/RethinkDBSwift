@@ -15,8 +15,16 @@ import RethinkDB
 
 ### Create a new connection
 ```swift
-let r = RethinkDB.r // or RethinkDB()
+let r = RethinkDB.r
 let conn = try! r.connect()
+```
+
+### Connection pool
+```swift
+let pool = try! r.pool(size: 15) // creates a connection pool with 15 connections
+let conn = try! pool.acquire() // or acquire(timeout: secondsUntilTimeout)
+// do stuff with the connection
+pool.release(connection: conn)
 ```
 
 ### Query the database
@@ -37,6 +45,7 @@ let numbers: [Document] = [
 ]
 try! r.db("test").table("numbers").insert(numbers).run(conn)
 ```
+
 ### Further reading
 Check out the [API documentation](https://rethinkdb.com/api/) for one of the official drivers.
 
